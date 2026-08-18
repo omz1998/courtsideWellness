@@ -71,11 +71,15 @@ async function confirmFromReference(ref) {
     logger.warn("Checkout session had no client_reference_id — nothing to confirm.");
     return;
   }
-  const [type, id] = ref.split(":");
-  if (type === "booking" && id) {
+  // Uses "_" rather than ":" as the separator — Stripe only allows
+  // letters/numbers/dashes/underscores in client_reference_id and silently
+  // drops anything else, which is why this used to arrive as null.
+  if (ref.startsWith("booking_")) {
+    const id = ref.slice("booking_".length);
     await db.collection("bookings").doc(id).update({ status: "confirmed" });
     logger.info(`Confirmed booking ${id}`);
-  } else if (type === "package" && id) {
+  } else if (ref.startsWith("package_")) {
+    const id = ref.slice("package_".length);
     await db.collection("packages").doc(id).update({ status: "confirmed" });
     logger.info(`Confirmed package ${id}`);
   } else {
