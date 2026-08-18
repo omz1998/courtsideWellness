@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Account · Courtside Wellness</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="images/favicon.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a href="index.html" class="brand"><img src="images/logo-icon.png" alt="Courtside Wellness" onerror="this.style.display='none'">Courtside <span>Wellness</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="classes.html">Classes</a></li>
+      <li><a href="packages.html">Packages</a></li>
+      <li><a href="coming-soon.html">Coming Soon</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li><a href="account.html" id="account-nav-link" class="active">My Account</a></li>
+      <li id="admin-nav-slot"></li>
+    </ul>
+    <a href="booking.html" class="nav-cta">Book a Class</a>
+    <button class="nav-toggle" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+</header>
+
+<section class="hero" style="padding-bottom: 20px;">
+  <span class="eyebrow">Members</span>
+  <h1>My Account</h1>
+  <p class="lead">Update your details or manage your upcoming bookings.</p>
+</section>
+
+<section style="padding-top: 0; padding-bottom: 0;">
+  <div class="section-inner reveal">
+    <div id="member-stats" class="stats stats-3" style="margin-bottom: 10px;"></div>
+    <a href="packages.html" class="btn btn-outline" style="margin-top: 10px;">Buy a Class Pack</a>
+  </div>
+</section>
+
+<section style="padding-top: 20px;">
+  <div class="section-inner reveal">
+    <div class="contact-grid">
+      <div>
+        <div class="info-block">
+          <h3>Your Details</h3>
+          <form id="profile-form" style="margin-top: 16px;">
+            <div class="form-grid">
+              <div>
+                <label for="p-name">Full name</label>
+                <input type="text" id="p-name" required>
+              </div>
+              <div>
+                <label for="p-email">Email</label>
+                <input type="email" id="p-email" disabled>
+              </div>
+              <div>
+                <label for="p-phone">Phone</label>
+                <input type="tel" id="p-phone" placeholder="0412 345 678" required>
+              </div>
+              <p id="profile-error" class="form-error booking-hidden"></p>
+              <button type="submit" id="profile-save" class="btn btn-primary">Save Changes</button>
+            </div>
+          </form>
+        </div>
+        <button id="logout-btn" class="btn btn-outline" style="margin-top: 8px;">Log Out</button>
+      </div>
+
+      <div>
+        <span class="section-label">Your Bookings</span>
+        <div id="bookings-list" style="margin-top: 16px; display: flex; flex-direction: column; gap: 16px;"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-grid">
+    <div>
+      <h4>Courtside Wellness</h4>
+      <p>Fitness, wellness and community in Minto NSW. All levels welcome.</p>
+      <a href="https://instagram.com/courtsidewellness" target="_blank" rel="noopener" style="display:inline-block; margin-top:10px;">Instagram</a>
+    </div>
+    <div>
+      <h4>Navigation</h4>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="classes.html">Classes</a></li>
+        <li><a href="packages.html">Packages</a></li>
+        <li><a href="coming-soon.html">Coming Soon</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Find Us</h4>
+      <p>Inside Padel Spot Minto<br>5 Saggart Field Road, Minto NSW 2566</p>
+    </div>
+  </div>
+  <div class="footer-bottom">&copy; 2026 Courtside Wellness. All rights reserved.</div>
+</footer>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/booking.js"></script>
+<script src="js/account.js"></script>
+<script src="js/script.js"></script>
+</body>
+</html>

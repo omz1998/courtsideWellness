@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Class Packages · Courtside Wellness</title>
+<meta name="description" content="Buy a class pack at Courtside Wellness, Minto NSW — 5 classes for the price of 4 ($80), or 10 for the price of 8 ($160). Members only.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="images/favicon.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a href="index.html" class="brand"><img src="images/logo-icon.png" alt="Courtside Wellness" onerror="this.style.display='none'">Courtside <span>Wellness</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="classes.html">Classes</a></li>
+      <li><a href="packages.html" class="active">Packages</a></li>
+      <li><a href="coming-soon.html">Coming Soon</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li><a href="login.html" id="account-nav-link">Login</a></li>
+      <li id="admin-nav-slot"></li>
+    </ul>
+    <a href="booking.html" class="nav-cta">Book a Class</a>
+    <button class="nav-toggle" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+</header>
+
+<section class="hero" style="padding-bottom: 20px;">
+  <span class="eyebrow">Members</span>
+  <h1>Class Packages</h1>
+  <p class="lead">Buy in bulk and save 20%. Credits work on any class — Mat Pilates, Mums and Bubs, Kids Fitness, or Fitness Class.</p>
+</section>
+
+<section style="padding-top: 20px;">
+  <div class="section-inner reveal">
+    <div id="packages-wrap">
+      <div id="my-credits"></div>
+
+      <div class="card-grid">
+        <div class="feature-card" style="text-align: center;">
+          <h3>5-Class Pack</h3>
+          <p style="text-decoration: line-through; color: var(--ink-soft); margin: 6px 0 0;">$100</p>
+          <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 2.2rem; font-weight: 700; color: var(--pink-dark); margin: 4px 0 10px;">$80</div>
+          <p>5 classes, use them on any class type. Save $20 — that's a free class.</p>
+          <button type="button" id="buy-pack5" class="btn btn-primary" style="margin-top: 16px;">Buy Now</button>
+        </div>
+        <div class="feature-card" style="text-align: center;">
+          <h3>10-Class Pack</h3>
+          <p style="text-decoration: line-through; color: var(--ink-soft); margin: 6px 0 0;">$200</p>
+          <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 2.2rem; font-weight: 700; color: var(--pink-dark); margin: 4px 0 10px;">$160</div>
+          <p>10 classes, use them on any class type. Save $40 — that's two free classes.</p>
+          <button type="button" id="buy-pack10" class="btn btn-primary" style="margin-top: 16px;">Buy Now</button>
+        </div>
+      </div>
+
+      <p id="packages-error" class="form-error booking-hidden" style="margin-top: 24px;"></p>
+
+      <div class="notice" style="margin-top: 24px;">
+        Credits never expire and work on any class type. Once you've bought a pack, choose "Use 1 Class Credit" at the payment step when booking instead of paying per class.
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-grid">
+    <div>
+      <h4>Courtside Wellness</h4>
+      <p>Fitness, wellness and community in Minto NSW. All levels welcome.</p>
+      <a href="https://instagram.com/courtsidewellness" target="_blank" rel="noopener" style="display:inline-block; margin-top:10px;">Instagram</a>
+    </div>
+    <div>
+      <h4>Navigation</h4>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="classes.html">Classes</a></li>
+        <li><a href="packages.html">Packages</a></li>
+        <li><a href="coming-soon.html">Coming Soon</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Find Us</h4>
+      <p>Inside Padel Spot Minto<br>5 Saggart Field Road, Minto NSW 2566</p>
+    </div>
+  </div>
+  <div class="footer-bottom">&copy; 2026 Courtside Wellness. All rights reserved.</div>
+</footer>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/packages.js"></script>
+<script src="js/script.js"></script>
+</body>
+</html>

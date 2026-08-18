@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact · Courtside Wellness</title>
+<meta name="description" content="Get in touch with Courtside Wellness, a fitness and wellness community in Minto NSW.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="images/favicon.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a href="index.html" class="brand"><img src="images/logo-icon.png" alt="Courtside Wellness" onerror="this.style.display='none'">Courtside <span>Wellness</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="classes.html">Classes</a></li>
+      <li><a href="packages.html">Packages</a></li>
+      <li><a href="coming-soon.html">Coming Soon</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li><a href="login.html" id="account-nav-link">Login</a></li>
+      <li id="admin-nav-slot"></li>
+    </ul>
+    <a href="booking.html" class="nav-cta">Book a Class</a>
+    <button class="nav-toggle" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+</header>
+
+<section class="hero" style="padding-bottom: 20px;">
+  <span class="eyebrow">Get In Touch</span>
+  <h1>Ready for a Class?</h1>
+  <p class="lead">Book online any time, or get in touch if you've got a question first.</p>
+  <div class="btn-row">
+    <a href="booking.html" class="btn btn-primary">Book a Class</a>
+    <button type="button" id="message-us-btn" class="btn btn-outline">Message Us</button>
+  </div>
+</section>
+
+<section style="padding-top: 20px;">
+  <div class="section-inner reveal">
+    <div class="contact-grid">
+      <div>
+        <div class="info-block">
+          <h3>Find Us</h3>
+          <p>Inside Padel Spot Minto<br>5 Saggart Field Road, Minto NSW 2566</p>
+        </div>
+        <div class="info-block">
+          <h3>Class Times</h3>
+          <table class="hours-table">
+            <tr><td>Mat Pilates</td><td>10:00am</td></tr>
+            <tr><td>Mums and Bubs</td><td>11:00am</td></tr>
+            <tr><td>Kids Fitness</td><td>10:00am & 11:00am</td></tr>
+            <tr><td>Fitness Class</td><td>12:30pm</td></tr>
+            <tr><td>Saturday & Sunday</td><td>Closed</td></tr>
+          </table>
+          <p style="font-size: 0.85rem; color: var(--ink-soft); margin-top: 8px;">All classes run Monday to Friday. See <a href="classes.html" style="text-decoration: underline;">Classes</a> for full details.</p>
+        </div>
+        <div class="info-block">
+          <h3>Contact</h3>
+          <p>Email: admin@courtsidewellness.com.au<br>WhatsApp: coming soon</p>
+        </div>
+      </div>
+      <iframe
+        class="map-embed"
+        src="https://www.google.com/maps?q=Padel+Spot+Minto%2C+5+Saggart+Field+Road%2C+Minto+NSW+2566&output=embed"
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        title="Map showing Courtside Wellness, inside Padel Spot Minto, 5 Saggart Field Road, Minto NSW 2566"
+      ></iframe>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-grid">
+    <div>
+      <h4>Courtside Wellness</h4>
+      <p>Fitness, wellness and community in Minto NSW. All levels welcome.</p>
+      <a href="https://instagram.com/courtsidewellness" target="_blank" rel="noopener" style="display:inline-block; margin-top:10px;">Instagram</a>
+    </div>
+    <div>
+      <h4>Navigation</h4>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="classes.html">Classes</a></li>
+        <li><a href="packages.html">Packages</a></li>
+        <li><a href="coming-soon.html">Coming Soon</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Find Us</h4>
+      <p>Inside Padel Spot Minto<br>5 Saggart Field Road, Minto NSW 2566</p>
+    </div>
+  </div>
+  <div class="footer-bottom">&copy; 2026 Courtside Wellness. All rights reserved.</div>
+</footer>
+
+<div id="message-modal" class="modal-overlay booking-hidden">
+  <div class="modal-box">
+    <button type="button" class="modal-close" id="message-modal-close" aria-label="Close">&times;</button>
+    <h3 style="margin-top: 0;">Send us a message</h3>
+    <p style="font-size: 0.9rem; color: var(--ink-soft); margin-bottom: 8px;">We'll get back to you by email.</p>
+    <form id="message-form">
+      <div class="form-grid">
+        <div>
+          <label for="m-name">Name</label>
+          <input type="text" id="m-name" required>
+        </div>
+        <div>
+          <label for="m-email">Email</label>
+          <input type="email" id="m-email" required>
+        </div>
+        <div>
+          <label for="m-message">Message</label>
+          <textarea id="m-message" rows="4" required></textarea>
+        </div>
+        <!-- Honeypot spam trap, left blank by real visitors -->
+        <input type="checkbox" name="botcheck" id="m-botcheck" style="display: none;" tabindex="-1" autocomplete="off">
+        <p id="message-error" class="form-error booking-hidden"></p>
+        <p id="message-success" class="booking-hidden" style="color: #1A7F4B; font-size: 0.9rem; margin: 0;">Thanks — your message has been sent. We'll be in touch soon.</p>
+        <button type="submit" id="message-submit" class="btn btn-primary">Send Message</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/message.js"></script>
+<script src="js/script.js"></script>
+</body>
+</html>

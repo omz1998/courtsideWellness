@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin · Courtside Wellness</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="images/favicon.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a href="index.html" class="brand"><img src="images/logo-icon.png" alt="Courtside Wellness" onerror="this.style.display='none'">Courtside <span>Wellness</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="classes.html">Classes</a></li>
+      <li><a href="packages.html">Packages</a></li>
+      <li><a href="coming-soon.html">Coming Soon</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li><a href="login.html" id="account-nav-link">Login</a></li>
+      <li id="admin-nav-slot"></li>
+    </ul>
+    <a href="booking.html" class="nav-cta">Book a Class</a>
+    <button class="nav-toggle" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+</header>
+
+<section class="hero" style="padding-bottom: 20px;">
+  <span class="eyebrow">Admin</span>
+  <h1>Bookings & Customers</h1>
+  <p class="lead">Everything booked across the studio, and who's booked it.</p>
+</section>
+
+<section style="padding-top: 0;">
+  <div class="section-inner reveal" id="admin-wrap">
+
+    <div class="admin-stats">
+      <div class="stat-card">
+        <div class="stat-number" id="stat-upcoming">—</div>
+        <div class="stat-label">Upcoming bookings</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="stat-pending">—</div>
+        <div class="stat-label">Pending payment</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="stat-confirmed">—</div>
+        <div class="stat-label">Confirmed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="stat-revenue">—</div>
+        <div class="stat-label">Confirmed revenue</div>
+      </div>
+    </div>
+
+    <span class="section-label">All Bookings</span>
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Class Date</th>
+            <th>Class</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Price</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="bookings-tbody">
+          <tr><td colspan="8">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <span class="section-label">Class Packages</span>
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Purchased</th>
+            <th>Pack</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Price</th>
+            <th>Credits Left</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="packages-tbody">
+          <tr><td colspan="9">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <span class="section-label">All Customers</span>
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Joined</th>
+          </tr>
+        </thead>
+        <tbody id="customers-tbody">
+          <tr><td colspan="4">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-grid">
+    <div>
+      <h4>Courtside Wellness</h4>
+      <p>Fitness, wellness and community in Minto NSW. All levels welcome.</p>
+      <a href="https://instagram.com/courtsidewellness" target="_blank" rel="noopener" style="display:inline-block; margin-top:10px;">Instagram</a>
+    </div>
+    <div>
+      <h4>Navigation</h4>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="classes.html">Classes</a></li>
+        <li><a href="packages.html">Packages</a></li>
+        <li><a href="coming-soon.html">Coming Soon</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Find Us</h4>
+      <p>Inside Padel Spot Minto<br>5 Saggart Field Road, Minto NSW 2566</p>
+    </div>
+  </div>
+  <div class="footer-bottom">&copy; 2026 Courtside Wellness. All rights reserved.</div>
+</footer>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/admin.js"></script>
+<script src="js/script.js"></script>
+</body>
+</html>

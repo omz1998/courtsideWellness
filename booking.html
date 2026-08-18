@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book a Class · Courtside Wellness</title>
+<meta name="description" content="Book women's Mat Pilates, Mums and Bubs, Fitness Class ($20) or Kids Fitness ($15, open to all kids) at Courtside Wellness, Minto NSW. No account needed.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="images/favicon.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a href="index.html" class="brand"><img src="images/logo-icon.png" alt="Courtside Wellness" onerror="this.style.display='none'">Courtside <span>Wellness</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="classes.html">Classes</a></li>
+      <li><a href="packages.html">Packages</a></li>
+      <li><a href="coming-soon.html">Coming Soon</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li><a href="login.html" id="account-nav-link">Login</a></li>
+      <li id="admin-nav-slot"></li>
+    </ul>
+    <a href="booking.html" class="nav-cta">Book a Class</a>
+    <button class="nav-toggle" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+</header>
+
+<section class="hero" style="padding-bottom: 20px;">
+  <span class="eyebrow">Book a Class</span>
+  <h1>Book Your Spot</h1>
+  <p class="lead">No account needed — book as a guest, or log in first if you'd like this saved to your account.</p>
+  <p class="hero-meta">Classes start Monday 7 September 2026 — that's the earliest date you'll see below.</p>
+</section>
+
+<section style="padding-top: 0;">
+  <div class="section-inner reveal">
+    <div class="booking-card">
+      <div class="booking-steps">
+        <div class="step active">1. Choose a class</div>
+        <div class="step">2. Choose a date</div>
+        <div class="step">3. Your details</div>
+        <div class="step">4. Payment</div>
+      </div>
+
+      <!-- Step 1: class type -->
+      <div id="step-1" class="booking-step">
+        <div class="class-type-grid">
+          <div class="class-type-option" data-type="pilates">
+            <h3>Mat Pilates</h3>
+            <div class="amount">$20</div>
+            <p>10:00am, Mon&ndash;Fri. Women's, up to 30 people, all levels welcome.</p>
+          </div>
+          <div class="class-type-option" data-type="mumsbubs">
+            <h3>Mums and Bubs</h3>
+            <div class="amount">$20</div>
+            <p>11:00am, Mon&ndash;Fri. Women's, pilates for new mums, bub welcome.</p>
+          </div>
+          <div class="class-type-option" data-type="kids">
+            <h3>Kids Fitness</h3>
+            <div class="amount">$15</div>
+            <p>10:00am & 11:00am, Mon&ndash;Fri. Open to all kids.</p>
+          </div>
+          <div class="class-type-option" data-type="fitness">
+            <h3>Fitness Class</h3>
+            <div class="amount">$20</div>
+            <p>12:30pm, Mon&ndash;Fri. Women's general fitness session, all levels.</p>
+          </div>
+        </div>
+        <button id="to-step-2" class="btn btn-primary" style="margin-top: 24px;" disabled>Continue</button>
+      </div>
+
+      <!-- Step 2: date -->
+      <div id="step-2" class="booking-step booking-hidden">
+        <span class="section-label" id="date-grid-label">Choose a date</span>
+        <div id="date-grid" class="date-grid"></div>
+
+        <div id="time-grid-wrap" class="booking-hidden" style="margin-top: 28px;">
+          <span class="section-label">Choose a time</span>
+          <div id="time-grid" class="date-grid"></div>
+        </div>
+
+        <div id="capacity-status" class="capacity-status booking-hidden"></div>
+        <div class="btn-row" style="justify-content: flex-start; margin-top: 24px;">
+          <button type="button" id="back-to-1" class="btn btn-outline">Back</button>
+          <button id="to-step-3" class="btn btn-primary" disabled>Continue</button>
+        </div>
+      </div>
+
+      <!-- Step 3: attendee details -->
+      <div id="step-3" class="booking-step booking-hidden">
+        <p id="guest-note" style="font-size: 0.9rem; color: var(--ink-soft); margin-bottom: 16px;">
+          Booking as a guest. <a href="login.html?redirect=booking.html" style="text-decoration: underline; color: var(--pink-dark); font-weight: 600;">Log in</a> first if you'd like this booking saved to your account so you can view or cancel it later.
+        </p>
+        <form id="booking-form">
+          <div class="form-grid">
+            <div>
+              <label for="b-name">Full name</label>
+              <input type="text" id="b-name" required>
+            </div>
+            <div>
+              <label for="b-email">Email</label>
+              <input type="email" id="b-email" required>
+            </div>
+            <div>
+              <label for="b-phone">Phone</label>
+              <input type="tel" id="b-phone" placeholder="0412 345 678" required>
+            </div>
+            <p id="form-error" class="form-error booking-hidden"></p>
+            <div class="btn-row" style="justify-content: flex-start;">
+              <button type="button" id="back-to-2" class="btn btn-outline">Back</button>
+              <button type="submit" id="submit-booking" class="btn btn-primary">Continue to Payment</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Step 4: payment summary -->
+      <div id="step-4" class="booking-step booking-hidden">
+        <div class="summary-row"><span>Class</span><span id="summary-class"></span></div>
+        <div class="summary-row"><span>Name</span><span id="summary-name"></span></div>
+        <div class="summary-row"><span>Class date</span><span id="summary-date"></span></div>
+        <div class="summary-row total"><span>Total due</span><span id="summary-price"></span></div>
+
+        <div id="use-credit-row" class="booking-hidden" style="margin-top: 24px;">
+          <button type="button" id="use-credit-btn" class="btn btn-primary">Use 1 Class Credit</button>
+          <p style="font-size: 0.85rem; color: var(--ink-soft); margin: 10px 0 0;">or pay for this class instead:</p>
+        </div>
+
+        <button id="go-to-payment" class="btn btn-primary" style="margin-top: 16px;">Pay Now →</button>
+        <p id="payment-error" class="form-error booking-hidden" style="margin-top: 14px;"></p>
+        <p id="payment-success" class="booking-hidden" style="color: #1A7F4B; font-weight: 600; margin-top: 14px;">Booking confirmed using a class credit — see you there!</p>
+        <p id="payment-note" style="font-size: 0.85rem; color: var(--ink-soft); margin-top: 14px;">
+          You'll be taken to a secure checkout to complete payment. Your booking is held once you submit your details, but isn't fully confirmed until payment goes through.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-grid">
+    <div>
+      <h4>Courtside Wellness</h4>
+      <p>Fitness, wellness and community in Minto NSW. All levels welcome.</p>
+      <a href="https://instagram.com/courtsidewellness" target="_blank" rel="noopener" style="display:inline-block; margin-top:10px;">Instagram</a>
+    </div>
+    <div>
+      <h4>Navigation</h4>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="classes.html">Classes</a></li>
+        <li><a href="packages.html">Packages</a></li>
+        <li><a href="coming-soon.html">Coming Soon</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Find Us</h4>
+      <p>Inside Padel Spot Minto<br>5 Saggart Field Road, Minto NSW 2566</p>
+    </div>
+  </div>
+  <div class="footer-bottom">&copy; 2026 Courtside Wellness. All rights reserved.</div>
+</footer>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/booking.js"></script>
+<script src="js/script.js"></script>
+</body>
+</html>

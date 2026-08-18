@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign Up · Courtside Wellness</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="images/favicon.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a href="index.html" class="brand"><img src="images/logo-icon.png" alt="Courtside Wellness" onerror="this.style.display='none'">Courtside <span>Wellness</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="classes.html">Classes</a></li>
+      <li><a href="packages.html">Packages</a></li>
+      <li><a href="coming-soon.html">Coming Soon</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li><a href="login.html" id="account-nav-link">Login</a></li>
+      <li id="admin-nav-slot"></li>
+    </ul>
+    <a href="booking.html" class="nav-cta">Book a Class</a>
+    <button class="nav-toggle" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+</header>
+
+<section class="hero" style="padding-bottom: 20px;">
+  <span class="eyebrow">Members</span>
+  <h1>Create Your Account</h1>
+  <p class="lead">Sign up to book classes, and manage or cancel your bookings any time.</p>
+</section>
+
+<section style="padding-top: 0;">
+  <div class="section-inner reveal">
+    <div class="booking-card" style="max-width: 460px; margin: 0 auto;">
+      <form id="signup-form">
+        <div class="form-grid">
+          <div>
+            <label for="s-name">Full name</label>
+            <input type="text" id="s-name" required>
+          </div>
+          <div>
+            <label for="s-email">Email</label>
+            <input type="email" id="s-email" required>
+          </div>
+          <div>
+            <label for="s-phone">Phone</label>
+            <input type="tel" id="s-phone" placeholder="0412 345 678" required>
+          </div>
+          <div>
+            <label for="s-password">Password</label>
+            <input type="password" id="s-password" required minlength="6">
+          </div>
+          <p id="signup-error" class="form-error booking-hidden"></p>
+          <button type="submit" id="signup-submit" class="btn btn-primary">Create Account</button>
+        </div>
+      </form>
+      <p style="margin-top: 20px; font-size: 0.9rem;">
+        Already have an account? <a href="login.html" style="text-decoration: underline; color: var(--pink-dark); font-weight: 600;">Log in</a>
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-grid">
+    <div>
+      <h4>Courtside Wellness</h4>
+      <p>Fitness, wellness and community in Minto NSW. All levels welcome.</p>
+      <a href="https://instagram.com/courtsidewellness" target="_blank" rel="noopener" style="display:inline-block; margin-top:10px;">Instagram</a>
+    </div>
+    <div>
+      <h4>Navigation</h4>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="classes.html">Classes</a></li>
+        <li><a href="packages.html">Packages</a></li>
+        <li><a href="coming-soon.html">Coming Soon</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Find Us</h4>
+      <p>Inside Padel Spot Minto<br>5 Saggart Field Road, Minto NSW 2566</p>
+    </div>
+  </div>
+  <div class="footer-bottom">&copy; 2026 Courtside Wellness. All rights reserved.</div>
+</footer>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/script.js"></script>
+<script>
+  function redirectTarget() {
+    const params = new URLSearchParams(location.search);
+    return params.get("redirect") || "account.html";
+  }
+
+  onAuthReady((user) => {
+    if (user) location.href = redirectTarget();
+  });
+
+  document.getElementById("signup-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const name = document.getElementById("s-name").value.trim();
+    const email = document.getElementById("s-email").value.trim();
+    const phone = document.getElementById("s-phone").value.trim();
+    const password = document.getElementById("s-password").value;
+    const errorEl = document.getElementById("signup-error");
+    const btn = document.getElementById("signup-submit");
+    errorEl.classList.add("booking-hidden");
+
+    if (!isValidAuPhone(phone)) {
+      errorEl.textContent = "Please enter a valid Australian phone number, e.g. 0412 345 678.";
+      errorEl.classList.remove("booking-hidden");
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Creating account…";
+    try {
+      await signUp(name, email, phone, password);
+      location.href = redirectTarget();
+    } catch (err) {
+      errorEl.textContent = err.message.replace("Firebase: ", "");
+      errorEl.classList.remove("booking-hidden");
+      btn.disabled = false;
+      btn.textContent = "Create Account";
+    }
+  });
+</script>
+</body>
+</html>

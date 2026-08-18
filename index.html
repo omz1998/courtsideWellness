@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Courtside Wellness · Fitness & Community in Minto NSW</title>
+<meta name="description" content="Courtside Wellness is a women's fitness and wellness community in Minto NSW — mat pilates, mums and bubs, kids fitness, and general fitness classes, from $15 per class.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="images/favicon.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav">
+    <a href="index.html" class="brand"><img src="images/logo-icon.png" alt="Courtside Wellness" onerror="this.style.display='none'">Courtside <span>Wellness</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="classes.html">Classes</a></li>
+      <li><a href="packages.html">Packages</a></li>
+      <li><a href="coming-soon.html">Coming Soon</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li><a href="login.html" id="account-nav-link">Login</a></li>
+      <li id="admin-nav-slot"></li>
+    </ul>
+    <a href="booking.html" class="nav-cta">Book a Class</a>
+    <button class="nav-toggle" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+</header>
+
+<section class="hero">
+  <img src="images/logo-full.png" alt="Courtside Wellness" class="hero-logo" onerror="this.style.display='none'">
+  <span class="eyebrow">Minto NSW</span>
+  <h1>Move, get fit,<br>and find your people</h1>
+  <p class="lead">A women's fitness and wellness community in Minto — mat pilates, mums and bubs, and general fitness classes for women, plus kids fitness for the whole family. Wear something you can move in and we'll take care of the rest — mats provided.</p>
+  <div class="btn-row">
+    <a href="booking.html" class="btn btn-primary">Book a Class</a>
+    <a href="classes.html" class="btn btn-outline">View Classes</a>
+  </div>
+  <p class="hero-meta">Monday–Friday · 5 Saggart Field Road, Minto NSW 2566</p>
+</section>
+
+<section>
+  <div class="section-inner reveal">
+    <span class="section-label">About</span>
+    <h2>Wellness at Courtside</h2>
+    <p class="lead-text">Courtside Wellness is a women's fitness and wellness community, hosted inside Padel Spot Minto at 5 Saggart Field Road, Minto NSW 2566. Whatever brings you in — pilates, fitness, or just a reason to show up and move with people who know your name — classes run in small groups so there's room for real instruction, not just a room full of mats. Kids Fitness is open to all children.</p>
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-number">Mon–Fri</div>
+        <div class="stat-label">Classes run</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">40 min</div>
+        <div class="stat-label">Class length</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">$20</div>
+        <div class="stat-label">Per class</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="section-inner reveal">
+    <span class="section-label">What's on</span>
+    <h2>Our Program</h2>
+    <p class="lead-text">Four classes running Monday to Friday, all live and bookable now.</p>
+    <div class="card-grid">
+      <div class="feature-card">
+        <h3>Mat Pilates</h3>
+        <p>$20 per class, 10:00am, up to 30 women.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Mums and Bubs</h3>
+        <p>$20 per class, 11:00am. Bub welcome in the room.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Kids Fitness</h3>
+        <p>$15 per class, 10:00am & 11:00am. Open to all kids.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Fitness Class</h3>
+        <p>$20 per class, 12:30pm. Women's general fitness, all levels.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-grid">
+    <div>
+      <h4>Courtside Wellness</h4>
+      <p>Fitness, wellness and community in Minto NSW. All levels welcome.</p>
+      <a href="https://instagram.com/courtsidewellness" target="_blank" rel="noopener" style="display:inline-block; margin-top:10px;">Instagram</a>
+    </div>
+    <div>
+      <h4>Navigation</h4>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="classes.html">Classes</a></li>
+        <li><a href="packages.html">Packages</a></li>
+        <li><a href="coming-soon.html">Coming Soon</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Find Us</h4>
+      <p>Inside Padel Spot Minto<br>5 Saggart Field Road, Minto NSW 2566</p>
+    </div>
+  </div>
+  <div class="footer-bottom">&copy; 2026 Courtside Wellness. All rights reserved.</div>
+</footer>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/script.js"></script>
+</body>
+</html>
