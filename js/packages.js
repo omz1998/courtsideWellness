@@ -86,8 +86,11 @@ async function buyPackage(packKey) {
 
     const url = new URL(cfg.stripeLink);
     // Prefixed so the Stripe webhook (functions/index.js) knows which
-    // Firestore collection to auto-confirm this payment against.
-    url.searchParams.set("client_reference_id", "package:" + pkgRef.id);
+    // Firestore collection to auto-confirm this payment against. Stripe only
+    // allows letters/numbers/dashes/underscores in client_reference_id and
+    // silently drops anything else (e.g. a colon), so this uses "_" as the
+    // separator rather than ":".
+    url.searchParams.set("client_reference_id", "package_" + pkgRef.id);
     url.searchParams.set("prefilled_email", email);
     window.location.href = url.toString();
   } catch (err) {
