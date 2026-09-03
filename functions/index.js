@@ -1,10 +1,11 @@
 // Courtside Wellness — Stripe webhook
 //
-// Stripe calls this URL directly the moment a payment succeeds. It verifies
-// the request really came from Stripe (using the signing secret), then uses
-// the Firebase Admin SDK to mark the matching booking or class package as
-// "confirmed" — bypassing the client Firestore rules entirely, since this
-// runs on the server, not in the customer's browser.
+// Stripe calls this URL directly the moment a payment succeeds (or a
+// membership subscription changes state). It verifies the request really
+// came from Stripe (using the signing secret), then uses the Firebase Admin
+// SDK to update the matching booking, class package, or membership in
+// Firestore — bypassing client Firestore rules entirely, since this runs on
+// the server, not in the customer's browser.
 //
 // This replaces having to manually click "Mark Paid" in admin.html for every
 // purchase. That button still exists and still works — useful as a fallback
@@ -44,17 +45,51 @@ exports.stripeWebhook = onRequest(
     }
 
     try {
-      const isCheckoutEvent =
-        event.type === "checkout.session.completed" ||
-        event.type === "checkout.session.async_payment_succeeded";
-
-      if (isCheckoutEvent) {
-        const session = event.data.object;
-        if (session.payment_status === "paid") {
-          await confirmFromReference(session.client_reference_id);
-        } else {
-          logger.info(`Session ${session.id} not yet paid (status: ${session.payment_status}) — skipping.`);
+      switch (event.type) {
+        case "checkout.session.completed":
+        case "checkout.session.async_payment_succeeded": {
+          const session = event.data.object;
+          if (session.payment_status !== "paid") {
+            logger.info(`Session ${session.id} not yet paid (status: ${session.payment_status}) — skipping.`);
+            break;
+          }
+          if (session.mode === "subscription") {
+            await activateMembership(session.client_reference_id, session.subscription, session.customer);
+          } else {
+            await confirmFromReference(session.client_reference_id);
+          }
+          break;
         }
+
+        // Membership renewals/failures/cancellations reference the Stripe
+        // customer/subscription directly (no client_reference_id involved),
+        // so these look the user up by the stripeCustomerId we saved at signup.
+        case "invoice.paid": {
+          const invoice = event.data.object;
+          // invoice.subscription was removed in newer Stripe API versions —
+          // this is the replacement way to tell it's a subscription invoice.
+          if (invoice.parent?.type === "subscription_details") {
+            await renewMembership(invoice.customer);
+          }
+          break;
+        }
+        case "invoice.payment_failed": {
+          const invoice = event.data.object;
+          if (invoice.parent?.type === "subscription_details") {
+            await markMembershipPastDue(invoice.customer);
+          }
+          break;
+        }
+        case "customer.subscription.deleted": {
+          const sub = event.data.object;
+          await cancelMembership(sub.customer);
+          break;
+        }
+
+        default:
+          // We only ask Stripe to send the event types handled above, but
+          // ignore anything else just in case.
+          break;
       }
       res.status(200).send("ok");
     } catch (err) {
@@ -66,6 +101,7 @@ exports.stripeWebhook = onRequest(
   }
 );
 
+// Confirms a one-off booking or class package payment (checkout mode: "payment").
 async function confirmFromReference(ref) {
   if (!ref) {
     logger.warn("Checkout session had no client_reference_id — nothing to confirm.");
@@ -85,4 +121,75 @@ async function confirmFromReference(ref) {
   } else {
     logger.warn(`Unrecognised client_reference_id: "${ref}"`);
   }
+}
+
+// One week in milliseconds — memberships renew weekly, so this is used both
+// as the initial estimate on signup and refreshed on every successful
+// renewal payment. Using our own fixed cadence instead of trying to read an
+// exact period end back from Stripe sidesteps a moving target: Stripe has
+// restructured where that date lives on the invoice object more than once.
+const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+
+// First successful payment on a brand new membership subscription (checkout
+// mode: "subscription").
+async function activateMembership(ref, subscriptionId, customerId) {
+  if (!ref || !ref.startsWith("member_")) {
+    logger.warn(`Membership checkout had no/unrecognised client_reference_id: "${ref}"`);
+    return;
+  }
+  const uid = ref.slice("member_".length);
+  await db.collection("users").doc(uid).set({
+    membership: {
+      status: "active",
+      stripeSubscriptionId: subscriptionId,
+      stripeCustomerId: customerId,
+      currentPeriodEnd: admin.firestore.Timestamp.fromMillis(Date.now() + ONE_WEEK_MS),
+      startedAt: admin.firestore.FieldValue.serverTimestamp()
+    }
+  }, { merge: true });
+  logger.info(`Activated membership for user ${uid}`);
+}
+
+// Finds the users/{uid} doc for a given Stripe customer ID — used for
+// subscription lifecycle events, which reference the customer/subscription
+// directly rather than carrying a client_reference_id.
+async function findUserByStripeCustomer(customerId) {
+  const snap = await db.collection("users")
+    .where("membership.stripeCustomerId", "==", customerId)
+    .limit(1)
+    .get();
+  if (snap.empty) {
+    logger.warn(`No user found for Stripe customer ${customerId}`);
+    return null;
+  }
+  return snap.docs[0].ref;
+}
+
+// A weekly renewal payment succeeded — keep the membership active and push
+// out the estimated next renewal date.
+async function renewMembership(customerId) {
+  const userRef = await findUserByStripeCustomer(customerId);
+  if (!userRef) return;
+  await userRef.update({
+    "membership.status": "active",
+    "membership.currentPeriodEnd": admin.firestore.Timestamp.fromMillis(Date.now() + ONE_WEEK_MS)
+  });
+  logger.info(`Renewed membership for Stripe customer ${customerId}`);
+}
+
+// A renewal payment failed — flag it so the member/admin can follow up.
+// Stripe will retry automatically per its own retry schedule before giving up.
+async function markMembershipPastDue(customerId) {
+  const userRef = await findUserByStripeCustomer(customerId);
+  if (!userRef) return;
+  await userRef.update({ "membership.status": "past_due" });
+  logger.info(`Marked membership past_due for Stripe customer ${customerId}`);
+}
+
+// The subscription was cancelled — membership benefits stop applying.
+async function cancelMembership(customerId) {
+  const userRef = await findUserByStripeCustomer(customerId);
+  if (!userRef) return;
+  await userRef.update({ "membership.status": "cancelled" });
+  logger.info(`Cancelled membership for Stripe customer ${customerId}`);
 }

@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Class Packages · Courtside Wellness</title>
-<meta name="description" content="Buy a class pack at Courtside Wellness, Minto NSW — 5 classes for the price of 4 ($80), or 10 for the price of 8 ($160). Members only.">
+<title>Membership · Courtside Wellness</title>
+<meta name="description" content="Courtside Wellness membership: $40/week for unlimited Mat Pilates, Mums and Bubs, and Fitness Class bookings, plus full access to Padel Spot Minto's gym, sauna, cold plunge, discounted padel, and Cafe discounts. Cancel anytime.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="icon" type="image/png" href="images/favicon.png">
@@ -18,8 +18,8 @@
     <ul class="nav-links">
       <li><a href="index.html">Home</a></li>
       <li><a href="classes.html">Classes</a></li>
-      <li><a href="packages.html" class="active">Packages</a></li>
-      <li><a href="membership.html">Membership</a></li>
+      <li><a href="packages.html">Packages</a></li>
+      <li><a href="membership.html" class="active">Membership</a></li>
       <li><a href="coming-soon.html">Coming Soon</a></li>
       <li><a href="contact.html">Contact</a></li>
       <li><a href="login.html" id="account-nav-link">Login</a></li>
@@ -34,37 +34,54 @@
 
 <section class="hero" style="padding-bottom: 20px;">
   <span class="eyebrow">Members</span>
-  <h1>Class Packages</h1>
-  <p class="lead">Buy in bulk and save 20%. Credits work on any class — Mat Pilates, Mums and Bubs, Kids Fitness, or Fitness Class.</p>
+  <h1>Membership</h1>
+  <p class="lead">Unlimited classes, plus full access to everything at Padel Spot Minto. One weekly price, cancel any time.</p>
 </section>
 
 <section style="padding-top: 20px;">
   <div class="section-inner reveal">
-    <div id="packages-wrap">
-      <div id="my-credits"></div>
+    <div id="membership-wrap">
 
-      <div class="card-grid">
+      <div id="membership-status"></div>
+
+      <div class="card-grid" style="grid-template-columns: 1fr;">
         <div class="feature-card" style="text-align: center;">
-          <h3>5-Class Pack</h3>
-          <p style="text-decoration: line-through; color: var(--ink-soft); margin: 6px 0 0;">$100</p>
-          <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 2.2rem; font-weight: 700; color: var(--pink-dark); margin: 4px 0 10px;">$80</div>
-          <p>5 classes, use them on any class type. Save $20 — that's a free class.</p>
-          <button type="button" id="buy-pack5" class="btn btn-primary" style="margin-top: 16px;">Buy Now</button>
-        </div>
-        <div class="feature-card" style="text-align: center;">
-          <h3>10-Class Pack</h3>
-          <p style="text-decoration: line-through; color: var(--ink-soft); margin: 6px 0 0;">$200</p>
-          <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 2.2rem; font-weight: 700; color: var(--pink-dark); margin: 4px 0 10px;">$160</div>
-          <p>10 classes, use them on any class type. Save $40 — that's two free classes.</p>
-          <button type="button" id="buy-pack10" class="btn btn-primary" style="margin-top: 16px;">Buy Now</button>
+          <h3>Courtside Wellness Membership</h3>
+          <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 2.4rem; font-weight: 700; color: var(--pink-dark); margin: 10px 0;">$40<span style="font-size: 1rem; font-weight: 500; color: var(--ink-soft);">/week</span></div>
+          <p>Billed weekly, cancel any time — no lock-in contract.</p>
+          <button type="button" id="join-membership-btn" class="btn btn-primary" style="margin-top: 16px;">Join Now — $40/week</button>
         </div>
       </div>
 
-      <p id="packages-error" class="form-error booking-hidden" style="margin-top: 24px;"></p>
+      <p id="membership-error" class="form-error booking-hidden" style="margin-top: 24px;"></p>
+
+      <span class="section-label" style="margin-top: 32px; display: block;">What's Included</span>
+      <div class="card-grid" style="margin-top: 16px;">
+        <div class="feature-card">
+          <h3>Unlimited Classes</h3>
+          <p>Unlimited Mat Pilates, Mums and Bubs, and Fitness Class bookings — no per-class fee, no credits to track. (Kids Fitness stays pay-per-class at $15.)</p>
+        </div>
+        <div class="feature-card">
+          <h3>Padel Spot Minto Access</h3>
+          <p>Full access to the gym, sauna, and cold plunge at Padel Spot Minto, where Courtside Wellness is hosted.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Discounted Padel</h3>
+          <p>Members get a discounted rate on padel court hire at Padel Spot Minto.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Cafe Discounts</h3>
+          <p>A member discount at the Padel Spot Minto Cafe.</p>
+        </div>
+      </div>
 
       <div class="notice" style="margin-top: 24px;">
-        Credits never expire and work on any class type. Once you've bought a pack, choose "Use 1 Class Credit" at the payment step when booking instead of paying per class.
+        Membership requires an account so we can check your status at booking. <a href="signup.html?redirect=membership.html" style="text-decoration: underline; color: var(--pink-dark); font-weight: 600;">Sign up</a> first if you don't have one, then come back here to join.
       </div>
+      <div class="notice" style="margin-top: 16px;">
+        Cancel any time, no minimum commitment — just <a href="contact.html" style="text-decoration: underline;">get in touch</a> and we'll process it. Your membership stays active until the end of the week you've already paid for.
+      </div>
+
     </div>
   </div>
 </section>
@@ -100,7 +117,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="js/firebase-config.js"></script>
 <script src="js/auth.js"></script>
-<script src="js/packages.js"></script>
+<script src="js/membership.js"></script>
 <script src="js/script.js"></script>
 </body>
 </html>

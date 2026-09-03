@@ -61,6 +61,12 @@ let sessionsCache = {};       // sessionKey -> { booked, capacity, min }
 let bookingUser = null;       // Firebase user if logged in, else null
 let availableCredits = 0;     // total class credits across the user's confirmed packages
 let creditPackageId = null;   // the (oldest) package doc to redeem a credit from first
+let hasActiveMembership = false; // true if the logged-in user has an active $40/week membership
+
+// Membership covers unlimited bookings on these class types only — Kids
+// Fitness stays pay-per-class regardless of membership, since it's already
+// positioned separately (open to all kids, not just members).
+const MEMBERSHIP_CLASS_TYPES = ["pilates", "mumsbubs", "fitness"];
 
 // Class credits (from a 5- or 10-Class Pack) are generic — usable on any
 // class type, regardless of which pack they came from.
@@ -310,8 +316,32 @@ async function submitBooking(e) {
 
   goToStep(4);
 
+  const membershipRow = document.getElementById("use-membership-row");
+  const membershipBtn = document.getElementById("use-membership-btn");
   const creditRow = document.getElementById("use-credit-row");
   const creditBtn = document.getElementById("use-credit-btn");
+  const payBtn = document.getElementById("go-to-payment");
+  const paymentNote = document.getElementById("payment-note");
+
+  const membershipEligible = hasActiveMembership && MEMBERSHIP_CLASS_TYPES.includes(selectedClassType);
+
+  if (membershipEligible) {
+    // Free with membership — this is the only option, no need to also show
+    // credits or a Pay Now button.
+    membershipRow.classList.remove("booking-hidden");
+    membershipBtn.disabled = false;
+    membershipBtn.textContent = "Book Free — Membership";
+    membershipBtn.onclick = () => redeemMembership(bookingId);
+    creditRow.classList.add("booking-hidden");
+    payBtn.classList.add("booking-hidden");
+    paymentNote.classList.add("booking-hidden");
+    return;
+  }
+
+  membershipRow.classList.add("booking-hidden");
+  payBtn.classList.remove("booking-hidden");
+  paymentNote.classList.remove("booking-hidden");
+
   if (availableCredits > 0 && creditPackageId) {
     creditRow.classList.remove("booking-hidden");
     creditBtn.textContent = `Use 1 Class Credit (${availableCredits} available)`;
@@ -321,7 +351,6 @@ async function submitBooking(e) {
     creditRow.classList.add("booking-hidden");
   }
 
-  const payBtn = document.getElementById("go-to-payment");
   payBtn.disabled = false;
   payBtn.textContent = "Pay Now →";
   payBtn.onclick = () => {
@@ -368,12 +397,46 @@ async function redeemCredit(bookingId, sKey) {
     document.getElementById("use-credit-row").classList.add("booking-hidden");
     payBtn.classList.add("booking-hidden");
     document.getElementById("payment-note").classList.add("booking-hidden");
-    document.getElementById("payment-success").classList.remove("booking-hidden");
+    const successEl = document.getElementById("payment-success");
+    successEl.textContent = "Booking confirmed using a class credit — see you there!";
+    successEl.classList.remove("booking-hidden");
   } catch (err) {
     errorEl.textContent = err.message.replace("Firebase: ", "");
     errorEl.classList.remove("booking-hidden");
     creditBtn.disabled = false;
     creditBtn.textContent = "Use 1 Class Credit";
+  }
+}
+
+// Confirms the booking immediately using the member's active membership —
+// no Stripe redirect, no credits to track, since membership covers
+// unlimited bookings on eligible class types.
+async function redeemMembership(bookingId) {
+  const membershipBtn = document.getElementById("use-membership-btn");
+  const payBtn = document.getElementById("go-to-payment");
+  const errorEl = document.getElementById("payment-error");
+  errorEl.classList.add("booking-hidden");
+  membershipBtn.disabled = true;
+  membershipBtn.textContent = "Confirming…";
+
+  try {
+    await authDb.collection("bookings").doc(bookingId).update({
+      status: "confirmed",
+      paidWithMembership: true
+    });
+
+    document.getElementById("use-membership-row").classList.add("booking-hidden");
+    document.getElementById("use-credit-row").classList.add("booking-hidden");
+    payBtn.classList.add("booking-hidden");
+    document.getElementById("payment-note").classList.add("booking-hidden");
+    const successEl = document.getElementById("payment-success");
+    successEl.textContent = "Booking confirmed with your membership — see you there!";
+    successEl.classList.remove("booking-hidden");
+  } catch (err) {
+    errorEl.textContent = err.message.replace("Firebase: ", "");
+    errorEl.classList.remove("booking-hidden");
+    membershipBtn.disabled = false;
+    membershipBtn.textContent = "Book Free — Membership";
   }
 }
 
@@ -397,6 +460,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("b-email").value = user.email || "";
       }
       document.getElementById("guest-note").classList.add("booking-hidden");
+      hasActiveMembership = !!(profile && profile.membership && profile.membership.status === "active");
       await loadAvailableCredits(user.uid);
     }
   });

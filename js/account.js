@@ -43,6 +43,30 @@ function canReschedule(b, isPast, isCancelled) {
   return (start.getTime() - Date.now()) > 24 * 60 * 60 * 1000;
 }
 
+function fmtMembershipDate(ts) {
+  if (!ts) return "soon";
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  return d.toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" });
+}
+
+async function loadMembershipBox(uid) {
+  const box = document.getElementById("membership-status");
+  if (!box) return;
+  try {
+    const profile = await getUserProfile(uid);
+    const m = profile && profile.membership;
+    if (m && m.status === "active") {
+      box.innerHTML = `<div class="notice">Active member — unlimited classes, plus full Padel Spot Minto access. Next renewal: ${fmtMembershipDate(m.currentPeriodEnd)}. <a href="contact.html" style="text-decoration: underline;">Contact us</a> to cancel.</div>`;
+    } else if (m && m.status === "past_due") {
+      box.innerHTML = `<div class="notice">Your last membership payment didn't go through — <a href="contact.html" style="text-decoration: underline;">contact us</a> for help.</div>`;
+    } else if (m && m.status === "cancelled") {
+      box.innerHTML = `<div class="notice">Your membership has ended. <a href="membership.html" style="text-decoration: underline;">Rejoin any time</a>.</div>`;
+    }
+  } catch (err) {
+    console.warn("Couldn't load membership status:", err);
+  }
+}
+
 async function loadCredits(uid) {
   if (!authReady || !uid) return 0;
   try {
@@ -277,6 +301,7 @@ document.addEventListener("DOMContentLoaded", () => {
     currentUser = user;
     loadProfile(user.uid);
     loadBookings(user.uid);
+    loadMembershipBox(user.uid);
   });
 
   document.getElementById("profile-form").addEventListener("submit", async (e) => {

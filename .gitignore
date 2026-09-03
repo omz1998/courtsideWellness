@@ -1,4 +1,5 @@
 .fuse_hidden*
 node_modules/
-package-lock.json
-package.json
+/package-lock.json
+/package.json
+*.bak

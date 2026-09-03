@@ -19,6 +19,12 @@ const DEMO_PACKAGES = [
   { id: "pkgdemo3", name: "Grace Kim", email: "grace.kim@example.com", phone: "0456 789 012", label: "5-Class Pack", price: 80, credits: 5, creditsRemaining: 2, status: "confirmed", createdAt: demoTimestamp(-15) },
 ];
 
+const DEMO_MEMBERSHIPS = [
+  { id: "sarah", name: "Sarah Chen", email: "sarah.chen@example.com", phone: "0412 345 678", membership: { status: "active", currentPeriodEnd: demoTimestamp(4) } },
+  { id: "priya", name: "Priya Nair", email: "priya.nair@example.com", phone: "0423 456 789", membership: { status: "past_due", currentPeriodEnd: demoTimestamp(-1) } },
+  { id: "grace", name: "Grace Kim", email: "grace.kim@example.com", phone: "0456 789 012", membership: { status: "cancelled", currentPeriodEnd: demoTimestamp(-10) } },
+];
+
 const DEMO_CUSTOMERS = [
   { name: "Sarah Chen", email: "sarah.chen@example.com", phone: "0412 345 678", createdAt: demoTimestamp(-40) },
   { name: "Priya Nair", email: "priya.nair@example.com", phone: "0423 456 789", createdAt: demoTimestamp(-33) },
@@ -154,6 +160,77 @@ function renderPackagesTable(packages, interactive) {
   }
 }
 
+function fmtMembershipDate(ts) {
+  if (!ts) return "—";
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  return d.toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" });
+}
+
+function renderMembershipsTable(members, interactive) {
+  const tbody = document.getElementById("memberships-tbody");
+
+  if (members.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6">No members yet.</td></tr>`;
+    return;
+  }
+
+  const statusLabel = {
+    active: "Active",
+    past_due: "Past due",
+    cancelled: "Cancelled"
+  };
+
+  tbody.innerHTML = members.map((m) => {
+    const status = m.membership.status;
+    return `
+      <tr>
+        <td>${m.name || "—"}</td>
+        <td><a href="mailto:${m.email}">${m.email || "—"}</a></td>
+        <td><a href="tel:${m.phone}">${m.phone || "—"}</a></td>
+        <td><span class="admin-status admin-status-${status === "active" ? "confirmed" : status === "past_due" ? "pending_payment" : "cancelled"}">${statusLabel[status] || status}</span></td>
+        <td>${fmtMembershipDate(m.membership.currentPeriodEnd)}</td>
+        <td>
+          ${interactive ? `
+            ${status !== "active" ? `<button class="btn btn-outline admin-membership-action" data-action="reactivate" data-id="${m.id}">Reactivate</button>` : ""}
+            ${status !== "cancelled" ? `<button class="btn btn-outline admin-membership-action" data-action="cancel" data-id="${m.id}">Cancel</button>` : ""}
+          ` : `<span style="color: var(--ink-soft); font-size: 0.85rem;">Sample data</span>`}
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  if (interactive) {
+    tbody.querySelectorAll(".admin-membership-action").forEach((btn) => {
+      btn.addEventListener("click", () => handleMembershipAction(btn.dataset.action, btn.dataset.id));
+    });
+  }
+}
+
+async function loadMemberships() {
+  const snap = await authDb.collection("users").get();
+  const members = [];
+  snap.forEach((doc) => {
+    const data = doc.data();
+    if (data.membership) members.push({ id: doc.id, ...data });
+  });
+  members.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+  renderMembershipsTable(members, true);
+}
+
+async function handleMembershipAction(action, uid) {
+  try {
+    if (action === "cancel") {
+      if (!confirm("Manually cancel this membership? This is a manual override — normally cancellation happens automatically via Stripe. The member should also cancel their subscription in Stripe so they stop being billed.")) return;
+      await authDb.collection("users").doc(uid).update({ "membership.status": "cancelled" });
+    } else if (action === "reactivate") {
+      await authDb.collection("users").doc(uid).update({ "membership.status": "active" });
+    }
+    loadMemberships();
+  } catch (err) {
+    alert("Action failed: " + err.message.replace("Firebase: ", ""));
+  }
+}
+
 function renderCustomersTable(customers) {
   const tbody = document.getElementById("customers-tbody");
 
@@ -244,6 +321,7 @@ function loadDemo() {
   loadStats(DEMO_BOOKINGS);
   renderBookingsTable(DEMO_BOOKINGS, false);
   renderPackagesTable(DEMO_PACKAGES, false);
+  renderMembershipsTable(DEMO_MEMBERSHIPS, false);
   renderCustomersTable(DEMO_CUSTOMERS);
 }
 
@@ -268,6 +346,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     loadBookings();
     loadPackages();
+    loadMemberships();
     loadCustomers();
   });
 });

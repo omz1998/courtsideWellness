@@ -1,0 +1,14 @@
+{
+  "name": "courtside-wellness-functions",
+  "description": "Cloud Functions for Courtside Wellness — Stripe webhook that auto-confirms bookings and packages",
+  "private": true,
+  "engines": {
+    "node": "20"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "firebase-admin": "^12.1.0",
+    "firebase-functions": "^5.0.0",
+    "stripe": "^16.0.0"
+  }
+}

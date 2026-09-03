@@ -1,6 +1,6 @@
 # Courtside Wellness
 
-Static site for Courtside Wellness, a women's fitness and wellness community in Minto NSW, hosted inside Padel Spot Minto (Mat Pilates, Mums and Bubs, Fitness Class $20 · Kids Fitness $15, open to all kids) — HTML/CSS/JS, no build step. Includes guest + member booking, live capacity tracking, member accounts, and an admin dashboard.
+Static site for Courtside Wellness, a women's fitness and wellness community in Minto NSW, hosted inside Padel Spot Minto (Mat Pilates, Mums and Bubs, Fitness Class $20 · Kids Fitness $15, open to all kids) — HTML/CSS/JS, no build step. Includes guest + member booking, live capacity tracking, member accounts, class packages, a $40/week membership, and an admin dashboard. Payments run through Stripe, with a small Firebase Cloud Function (see **4c**) confirming bookings/packages/memberships automatically as Stripe reports them.
 
 Classes start Monday 7 September 2026 — `FIRST_BOOKABLE_DATE` in `js/booking.js` stops the date picker from offering anything earlier. Once that date passes it has no effect.
 
@@ -20,6 +20,7 @@ Classes start Monday 7 September 2026 — `FIRST_BOOKABLE_DATE` in `js/booking.j
 - `js/admin.js` — admin dashboard logic (all bookings/customers/packages, mark paid, cancel)
 - `js/message.js` — "Message Us" popup on `contact.html` — sends to your inbox via Web3Forms, needs a one-time access key (see below)
 - `packages.html` / `js/packages.js` — buy a 5 or 10-class pack (members only) — has the `CLASS_PACKS` Stripe links to fill in
+- `membership.html` / `js/membership.js` — join the $40/week membership (members only) — has the `MEMBERSHIP_STRIPE_LINK` Stripe link to fill in
 - `functions/index.js` — Cloud Function that auto-confirms bookings/packages when Stripe reports a successful payment (see **4c** below to switch it on)
 - `firebase.json`, `.firebaserc` — config for deploying the function above via the Firebase CLI
 - `images/logo-icon.png` — compact monogram, used in the header nav on every page and as the favicon source
@@ -41,7 +42,7 @@ Every footer currently links to `https://instagram.com/courtsidewellness` as a p
 2. Click the `</>` (web app) icon to register a web app. Copy the config into `js/firebase-config.js`.
 3. **Build → Authentication → Sign-in method → Email/Password → Enable → Save** (this is for the optional member accounts; guest booking doesn't need it, but login/signup pages do).
 4. **Build → Firestore Database → Create database.** Production mode, nearby region (e.g. `australia-southeast1`).
-5. **Rules** tab, replace with: (if you've already published rules before, you need to republish this version — the `bookings` update rule below was fixed to allow credit redemption, which previously failed with "Missing or insufficient permissions")
+5. **Rules** tab, replace with: (if you've already published rules before, you need to republish this version — it now also locks down the `membership` field on `users` so only the Cloud Function/admin can grant it, and adds a `bookings` rule allowing members to book free classes with an active membership)
 
    ```
    rules_version = '2';
@@ -55,7 +56,19 @@ Every footer currently links to `https://instagram.com/courtsidewellness` as a p
 
        match /users/{userId} {
          allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
-         allow write: if request.auth != null && request.auth.uid == userId;
+
+         // Membership is admin/Cloud-Function-only — the client can freely
+         // update their own profile (name/phone/etc.) but can't touch the
+         // "membership" field themselves, since that field is what unlocks
+         // free classes. The Cloud Function writes it via the Admin SDK,
+         // which bypasses these rules entirely.
+         allow create: if request.auth != null && request.auth.uid == userId
+                       && !("membership" in request.resource.data);
+         allow update: if isAdmin()
+                       || (request.auth != null
+                           && request.auth.uid == userId
+                           && !request.resource.data.diff(resource.data).affectedKeys().hasAny(["membership"]));
+         allow delete: if false;
        }
 
        match /sessions/{sessionId} {
@@ -85,7 +98,18 @@ Every footer currently links to `https://instagram.com/courtsidewellness` as a p
                            && resource.data.uid == request.auth.uid
                            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["status", "paidWithCredit", "packageId"])
                            && request.resource.data.status == "confirmed"
-                           && request.resource.data.paidWithCredit == true);
+                           && request.resource.data.paidWithCredit == true)
+                       // Booking free with an active membership: status +
+                       // paidWithMembership change together, and only to these
+                       // exact values — the get() call independently checks
+                       // Firestore for the caller's real membership status,
+                       // so this can't be faked from the client.
+                       || (request.auth != null
+                           && resource.data.uid == request.auth.uid
+                           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["status", "paidWithMembership"])
+                           && request.resource.data.status == "confirmed"
+                           && request.resource.data.paidWithMembership == true
+                           && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.membership.status == "active");
 
          allow delete: if false;
        }
@@ -186,6 +210,11 @@ This step adds one small piece of real server code — a Firebase **Cloud Functi
 7. **Create the webhook in Stripe:** in the [Stripe dashboard](https://dashboard.stripe.com), go to **Developers → Webhooks → + Add endpoint**. Paste the URL from step 6 as the endpoint URL. Under events to send, select:
    - `checkout.session.completed`
    - `checkout.session.async_payment_succeeded`
+   - `invoice.paid` (membership renewals)
+   - `invoice.payment_failed` (membership renewal failed)
+   - `customer.subscription.deleted` (membership cancelled)
+
+   (If you set this endpoint up before membership existed, go back into it and add the last three event types — the original setup only needed the first two.)
 
    Save, then click into the new endpoint and **Reveal** the **Signing secret** (starts with `whsec_`). Copy it.
 
@@ -202,6 +231,20 @@ This step adds one small piece of real server code — a Firebase **Cloud Functi
 10. **Test it:** make a test booking or package purchase and pay with a Stripe test card. Within a few seconds it should flip to "Confirmed" in `admin.html` on its own — no Mark Paid click needed. If it doesn't, check the logs with `firebase functions:log`, or in the Firebase console under **Functions → Logs**.
 
 Note: Stripe test mode and live mode each have their own separate webhook endpoint and signing secret. If you switch from testing to accepting real payments, repeat steps 7–9 for the live-mode endpoint (the function itself doesn't need to change).
+
+## 4d. Set up Stripe for membership ($40/week)
+
+Membership is billed as a real recurring Stripe subscription — Stripe charges the member's card automatically every week, no one has to remember to pay or repay manually.
+
+1. In the [Stripe dashboard](https://dashboard.stripe.com), go to **Payment links → + New**.
+2. Switch the pricing type from **One-time** to **Recurring**.
+3. Set the price to **$40 AUD**, billing period **Weekly**.
+4. Name it **"Courtside Wellness Membership"**. Save, then copy the payment link.
+5. In `js/membership.js`, replace `PASTE_YOUR_MEMBERSHIP_PAYMENT_LINK_HERE` with that link.
+
+Make sure the webhook destination from **4c** has the three subscription event types added (`invoice.paid`, `invoice.payment_failed`, `customer.subscription.deleted`) — without those, memberships will activate on first payment but never renew, fail, or cancel correctly.
+
+**Cancelling a membership:** there's no self-service "Cancel" button on the site for now — a member gets in touch (via the Contact page) and you cancel their subscription directly in the Stripe dashboard (**Customers → find them → Subscriptions → Cancel**). That triggers the `customer.subscription.deleted` webhook automatically, which updates Firestore for you. `admin.html`'s Memberships table also has a manual **Cancel**/**Reactivate** override if you ever need to fix a member's status by hand without touching Stripe (e.g. correcting a mistake) — note this doesn't stop Stripe from billing them, it only affects whether the site treats them as an active member, so use it alongside cancelling in Stripe, not instead of it.
 
 ## How booking works now
 
@@ -223,6 +266,17 @@ Note: Stripe test mode and live mode each have their own separate webhook endpoi
 - **Redeeming a credit:** at the payment step of `booking.html`, a logged-in member with confirmed credits sees a "Use 1 Class Credit" button alongside "Pay Now". Using a credit confirms the booking immediately (no Stripe redirect) and decrements the oldest package with credits left, all in one Firestore transaction.
 - **Account page** shows a "Class credits" count alongside bookings, plus a "Buy a Class Pack" button.
 - **Admin** sees every package purchase in its own table on `admin.html` — customer, pack size, price, credits remaining, status — with Mark Paid / Cancel actions, same pattern as bookings.
+
+## How membership works
+
+- **$40/week, billed automatically** as a real Stripe subscription — no manual repaying, no "Mark Paid" step. The Cloud Function webhook (see **4c**/**4d**) activates, renews, flags failed payments on, and cancels memberships as Stripe reports them.
+- **Covers unlimited bookings** on Mat Pilates, Mums and Bubs, and Fitness Class only — Kids Fitness always stays pay-per-class at $15, membership or not.
+- **Also includes** full access to Padel Spot Minto's gym, sauna, and cold plunge, a discounted rate on padel court hire, and a Cafe discount — these are physical perks Padel Spot Minto handles directly, not something the site tracks or enforces.
+- **Cancel any time, no lock-in** — a member gets in touch to cancel (see **4d**) and keeps access until the end of the week they've already paid for.
+- **Membership status lives on the member's own profile** (`users/{uid}.membership`), and is only ever written by the Cloud Function or an admin — never by the member's browser directly, so it can't be faked to get free classes.
+- **Booking flow:** at the payment step, an active member booking an eligible class type sees only a "Book Free — Membership" button — no Pay Now, no credit prompt, since it's free by default whenever it applies.
+- **Account page** shows current status (active/past due/cancelled) and next renewal date.
+- **Admin** sees every member in a Memberships table on `admin.html`, with a manual Cancel/Reactivate override for support cases (see the note in **4d** about using this alongside, not instead of, cancelling in Stripe).
 
 ## 5. Set up the "Message Us" popup (contact.html)
 
@@ -256,10 +310,11 @@ Note: only works once your .com.au registration is finalized (ABN/business name 
 - Firebase config, Email/Password provider, Firestore rules, your admin doc
 - Stripe payment links ($20 and $15) in `js/booking.js` — optionally split Mums and Bubs / Fitness Class onto their own $20 links instead of reusing the Mat Pilates one
 - Stripe payment links ($80 and $160) in `js/packages.js` for the class packages
+- Stripe recurring payment link ($40/week) in `js/membership.js` for membership — see **4d**
 - Instructor name/bio (not yet on any page)
 - WhatsApp Business profile — contact.html says "coming soon" until you set one up (see note below)
 - Web3Forms access key in `js/message.js` — the "Message Us" popup won't send until this is set (see above)
-- Stripe webhook setup (**4c** above) — until done, payments are confirmed manually via "Mark Paid" in admin.html
+- Stripe webhook setup (**4c** above) — until done, payments/memberships are confirmed manually via "Mark Paid" / the Memberships table in admin.html
 
 ## WhatsApp Business
 
