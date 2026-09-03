@@ -9,7 +9,7 @@
 // Paste your Stripe Payment Link for the $40/week recurring membership here.
 // Create it in Stripe as: Payment Links -> + New -> switch to "Recurring" ->
 // Weekly -> $40 AUD -> name it "Courtside Wellness Membership".
-const MEMBERSHIP_STRIPE_LINK = "PASTE_YOUR_MEMBERSHIP_PAYMENT_LINK_HERE";
+const MEMBERSHIP_STRIPE_LINK = "https://buy.stripe.com/test_4gMcN44g5gh83YL5Tb5gc04";
 
 let membershipUser = null;
 
