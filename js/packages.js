@@ -12,16 +12,16 @@ const CLASS_PACKS = {
     credits: 5,
     price: 80,
     regularPrice: 100,
-    // Paste your Stripe Payment Link for the $80 5-Class Pack here.
-    stripeLink: "https://buy.stripe.com/test_3cI5kC13Tfd452P6Xf5gc02"
+    // Live Stripe Payment Link: "5-Class Pack" ($80).
+    stripeLink: "https://buy.stripe.com/bJe9AV60xgsmeHW0HJ3ZK08"
   },
   pack10: {
     label: "10-Class Pack",
     credits: 10,
     price: 160,
     regularPrice: 200,
-    // Paste your Stripe Payment Link for the $160 10-Class Pack here.
-    stripeLink: "https://buy.stripe.com/test_14AaEW9Ap2qifHt4P75gc03"
+    // Live Stripe Payment Link: "10-Class Pack" ($160).
+    stripeLink: "https://buy.stripe.com/7sYeVfbkR5NI6bq7673ZK07"
   }
 };
 

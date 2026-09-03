@@ -15,8 +15,8 @@ const CLASS_TYPES = {
     capacity: 30,
     min: 8,
     times: ["10:00"],
-    // Paste your Stripe Payment Link for the $20 Mat Pilates class here.
-    stripeLink: "https://buy.stripe.com/test_9B68wO8wl0iadzl95n5gc00"
+    // Live Stripe Payment Link: "Standard Class - Courtside Wellness" ($20).
+    stripeLink: "https://buy.stripe.com/9B6aEZcoVcc6bvK7673ZK06"
   },
   kids: {
     label: "Kids Fitness",
@@ -24,8 +24,8 @@ const CLASS_TYPES = {
     capacity: 30,
     min: 8,
     times: ["10:00", "11:00"],
-    // Paste your Stripe Payment Link for the $15 Kids Fitness class here.
-    stripeLink: "https://buy.stripe.com/test_dRmcN47sh3um3YL4P75gc01"
+    // Live Stripe Payment Link: "Kids Fitness Class - Courtside Wellness" ($15).
+    stripeLink: "https://buy.stripe.com/28E3cx0Gd8ZU57mcqr3ZK09"
   },
   mumsbubs: {
     label: "Mums and Bubs",
@@ -33,8 +33,8 @@ const CLASS_TYPES = {
     capacity: 30,
     min: 8,
     times: ["11:00"],
-    // Reuses the $20 Mat Pilates Stripe link (same price point).
-    stripeLink: "https://buy.stripe.com/test_9B68wO8wl0iadzl95n5gc00"
+    // Reuses the $20 Standard Class Stripe link (same price point).
+    stripeLink: "https://buy.stripe.com/9B6aEZcoVcc6bvK7673ZK06"
   },
   fitness: {
     label: "Fitness Class",
@@ -42,8 +42,8 @@ const CLASS_TYPES = {
     capacity: 30,
     min: 8,
     times: ["12:30"],
-    // Reuses the $20 Mat Pilates Stripe link (same price point).
-    stripeLink: "https://buy.stripe.com/test_9B68wO8wl0iadzl95n5gc00"
+    // Reuses the $20 Standard Class Stripe link (same price point).
+    stripeLink: "https://buy.stripe.com/9B6aEZcoVcc6bvK7673ZK06"
   }
 };
 
