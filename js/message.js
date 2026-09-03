@@ -44,7 +44,7 @@ async function submitMessage(e) {
   }
 
   if (WEB3FORMS_ACCESS_KEY === "PASTE_WEB3FORMS_ACCESS_KEY") {
-    errorEl.textContent = "Messaging isn't set up yet — see the WEB3FORMS_ACCESS_KEY note in js/message.js.";
+    errorEl.textContent = "Messaging isn't set up yet. See the WEB3FORMS_ACCESS_KEY note in js/message.js.";
     errorEl.classList.remove("booking-hidden");
     return;
   }
@@ -88,7 +88,7 @@ async function submitMessage(e) {
       throw new Error(data.message || "Something went wrong sending your message.");
     }
   } catch (err) {
-    errorEl.textContent = err.message || "Something went wrong — please try again or email us directly.";
+    errorEl.textContent = err.message || "Something went wrong. Please try again or email us directly.";
     errorEl.classList.remove("booking-hidden");
     btn.disabled = false;
     btn.textContent = "Send Message";

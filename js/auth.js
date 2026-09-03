@@ -27,7 +27,7 @@ function isValidAuPhone(phone) {
 
 function requireAuthReady() {
   if (!authReady) {
-    throw new Error("Firebase isn't configured yet — add your project details to js/firebase-config.js first.");
+    throw new Error("Firebase isn't configured yet. Add your project details to js/firebase-config.js first.");
   }
 }
 
@@ -131,4 +131,24 @@ function wireAccountNavLink() {
   });
 }
 
+// Active members don't need class packages or credits, since membership
+// already covers unlimited bookings on eligible class types. Elements marked
+// class="member-hide" (nav links, buttons, promo notices) get hidden once we
+// know the signed-in user has an active membership.
+function hideMemberOnlyElements() {
+  onAuthReady(async (user) => {
+    if (!user) return;
+    try {
+      const profile = await getUserProfile(user.uid);
+      const isMember = !!(profile && profile.membership && profile.membership.status === "active");
+      if (isMember) {
+        document.querySelectorAll(".member-hide").forEach((el) => { el.style.display = "none"; });
+      }
+    } catch (e) {
+      // If this check fails, leave elements visible rather than break the page.
+    }
+  });
+}
+
 document.addEventListener("DOMContentLoaded", wireAccountNavLink);
+document.addEventListener("DOMContentLoaded", hideMemberOnlyElements);

@@ -81,7 +81,7 @@ a { color: inherit; text-decoration: none; }
 
 .nav-links {
   display: flex;
-  gap: 22px;
+  gap: 16px;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -90,7 +90,7 @@ a { color: inherit; text-decoration: none; }
 
 .nav-links a {
   font-weight: 500;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: var(--ink-soft);
   transition: color 0.2s ease;
 }
@@ -792,10 +792,10 @@ h2 {
   .booking-card { padding: 24px; }
 }
 
-/* The nav has six links plus the logo/wordmark and "Book a Class" button —
-   too much to fit on one line once the viewport drops below ~1040px, so the
+/* The nav has seven links plus the logo/wordmark and "Book a Class" button,
+   too much to fit on one line on anything but a wide desktop screen, so the
    hamburger menu takes over well before things get cramped or wrap badly. */
-@media (max-width: 1040px) {
+@media (max-width: 1240px) {
   .nav-links, .nav-cta { display: none; }
   .nav-toggle { display: flex; }
 

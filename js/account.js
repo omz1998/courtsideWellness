@@ -49,21 +49,27 @@ function fmtMembershipDate(ts) {
   return d.toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" });
 }
 
+// Returns true if the user has an active membership, so the caller can also
+// hide the credits stat and other member-only UI without a second Firestore read.
 async function loadMembershipBox(uid) {
   const box = document.getElementById("membership-status");
-  if (!box) return;
   try {
     const profile = await getUserProfile(uid);
     const m = profile && profile.membership;
-    if (m && m.status === "active") {
-      box.innerHTML = `<div class="notice">Active member — unlimited classes, plus full Padel Spot Minto access. Next renewal: ${fmtMembershipDate(m.currentPeriodEnd)}. <a href="contact.html" style="text-decoration: underline;">Contact us</a> to cancel.</div>`;
+    const isMember = !!(m && m.status === "active");
+    if (!box) return isMember;
+
+    if (isMember) {
+      box.innerHTML = `<div class="notice">Active member, unlimited classes plus full Padel Spot Minto access. Next renewal: ${fmtMembershipDate(m.currentPeriodEnd)}. <a href="contact.html" style="text-decoration: underline;">Contact us</a> to cancel.</div>`;
     } else if (m && m.status === "past_due") {
-      box.innerHTML = `<div class="notice">Your last membership payment didn't go through — <a href="contact.html" style="text-decoration: underline;">contact us</a> for help.</div>`;
+      box.innerHTML = `<div class="notice">Your last membership payment didn't go through. <a href="contact.html" style="text-decoration: underline;">Contact us</a> for help.</div>`;
     } else if (m && m.status === "cancelled") {
       box.innerHTML = `<div class="notice">Your membership has ended. <a href="membership.html" style="text-decoration: underline;">Rejoin any time</a>.</div>`;
     }
+    return isMember;
   } catch (err) {
     console.warn("Couldn't load membership status:", err);
+    return false;
   }
 }
 
@@ -83,12 +89,23 @@ async function loadCredits(uid) {
   }
 }
 
-function renderStats(bookings, credits) {
+function renderStats(bookings, credits, isMember) {
   const box = document.getElementById("member-stats");
   if (!box) return;
   const today = new Date().toISOString().slice(0, 10);
   const attended = bookings.filter((b) => b.status === "confirmed" && b.date < today).length;
   const upcoming = bookings.filter((b) => b.date >= today && b.status !== "cancelled").length;
+
+  // Members don't need a credits count shown, since membership already
+  // covers unlimited bookings on eligible class types. Swap the grid to two
+  // columns in that case so there's no empty gap where the card would be.
+  box.className = isMember ? "stats stats-2" : "stats stats-3";
+  const creditsCard = isMember ? "" : `
+    <div class="stat-card">
+      <div class="stat-number">${credits}</div>
+      <div class="stat-label">Class credits</div>
+    </div>
+  `;
 
   box.innerHTML = `
     <div class="stat-card">
@@ -99,10 +116,7 @@ function renderStats(bookings, credits) {
       <div class="stat-number">${upcoming}</div>
       <div class="stat-label">Upcoming bookings</div>
     </div>
-    <div class="stat-card">
-      <div class="stat-number">${credits}</div>
-      <div class="stat-label">Class credits</div>
-    </div>
+    ${creditsCard}
   `;
 }
 
@@ -135,7 +149,7 @@ function reschedulePanel(b) {
   `;
 }
 
-async function loadBookings(uid) {
+async function loadBookings(uid, isMember) {
   const list = document.getElementById("bookings-list");
   list.innerHTML = "<p>Loading your bookings…</p>";
 
@@ -148,7 +162,7 @@ async function loadBookings(uid) {
   snap.forEach((doc) => bookings.push({ id: doc.id, ...doc.data() }));
   bookings.sort((a, b) => (a.date || "").localeCompare(b.date || ""));
 
-  renderStats(bookings, credits);
+  renderStats(bookings, credits, isMember);
 
   if (snap.empty) {
     list.innerHTML = "<p>No bookings yet. <a href=\"booking.html\" style=\"text-decoration: underline; color: var(--pink-dark);\">Book a class</a>.</p>";
@@ -224,7 +238,7 @@ async function rescheduleBooking(bookingId, classType, oldDate, oldTime) {
 
   const start = classDateTime(oldDate, oldTime);
   if ((start.getTime() - Date.now()) <= 24 * 60 * 60 * 1000) {
-    errEl.textContent = "This booking is now less than 24 hours away and can't be moved online — contact us directly.";
+    errEl.textContent = "This booking is now less than 24 hours away and can't be moved online. Contact us directly.";
     errEl.classList.remove("booking-hidden");
     return;
   }
@@ -244,7 +258,7 @@ async function rescheduleBooking(bookingId, classType, oldDate, oldTime) {
 
       const newData = newDoc.exists ? newDoc.data() : { booked: 0, capacity: cfg.capacity, min: cfg.min };
       if ((newData.booked || 0) >= (newData.capacity || cfg.capacity)) {
-        throw new Error("That time is full — please pick another.");
+        throw new Error("That time is full. Please pick another.");
       }
 
       if (oldDoc.exists) {
@@ -293,15 +307,15 @@ async function cancelBooking(bookingId, dateStr, timeStr, classType) {
 document.addEventListener("DOMContentLoaded", () => {
   if (!document.getElementById("bookings-list")) return; // not on account page
 
-  onAuthReady((user) => {
+  onAuthReady(async (user) => {
     if (!user) {
       location.href = "login.html?redirect=" + encodeURIComponent("account.html");
       return;
     }
     currentUser = user;
     loadProfile(user.uid);
-    loadBookings(user.uid);
-    loadMembershipBox(user.uid);
+    const isMember = await loadMembershipBox(user.uid);
+    loadBookings(user.uid, isMember);
   });
 
   document.getElementById("profile-form").addEventListener("submit", async (e) => {

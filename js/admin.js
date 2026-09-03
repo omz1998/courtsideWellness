@@ -60,7 +60,7 @@ function formatTime(t) {
 }
 
 function fmtCreated(ts) {
-  if (!ts || !ts.toDate) return "—";
+  if (!ts || !ts.toDate) return "-";
   return ts.toDate().toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" });
 }
 
@@ -95,10 +95,10 @@ function renderBookingsTable(bookings, interactive) {
     return `
       <tr>
         <td>${fmtDate(b.date)}${formatTime(b.time)}</td>
-        <td>${b.classLabel || "—"}</td>
-        <td>${b.name || "—"}</td>
-        <td><a href="mailto:${b.email}">${b.email || "—"}</a></td>
-        <td><a href="tel:${b.phone}">${b.phone || "—"}</a></td>
+        <td>${b.classLabel || "-"}</td>
+        <td>${b.name || "-"}</td>
+        <td><a href="mailto:${b.email}">${b.email || "-"}</a></td>
+        <td><a href="tel:${b.phone}">${b.phone || "-"}</a></td>
         <td>$${b.price || 20}</td>
         <td><span class="admin-status admin-status-${b.status}">${statusLabel}</span></td>
         <td>
@@ -136,12 +136,12 @@ function renderPackagesTable(packages, interactive) {
     return `
       <tr>
         <td>${fmtCreated(p.createdAt)}</td>
-        <td>${p.label || "—"}</td>
-        <td>${p.name || "—"}</td>
-        <td><a href="mailto:${p.email}">${p.email || "—"}</a></td>
-        <td><a href="tel:${p.phone}">${p.phone || "—"}</a></td>
+        <td>${p.label || "-"}</td>
+        <td>${p.name || "-"}</td>
+        <td><a href="mailto:${p.email}">${p.email || "-"}</a></td>
+        <td><a href="tel:${p.phone}">${p.phone || "-"}</a></td>
         <td>$${p.price || 0}</td>
-        <td>${p.status === "confirmed" ? `${p.creditsRemaining ?? p.credits} of ${p.credits}` : "—"}</td>
+        <td>${p.status === "confirmed" ? `${p.creditsRemaining ?? p.credits} of ${p.credits}` : "-"}</td>
         <td><span class="admin-status admin-status-${p.status}">${statusLabel}</span></td>
         <td>
           ${interactive ? `
@@ -161,7 +161,7 @@ function renderPackagesTable(packages, interactive) {
 }
 
 function fmtMembershipDate(ts) {
-  if (!ts) return "—";
+  if (!ts) return "-";
   const d = ts.toDate ? ts.toDate() : new Date(ts);
   return d.toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" });
 }
@@ -184,9 +184,9 @@ function renderMembershipsTable(members, interactive) {
     const status = m.membership.status;
     return `
       <tr>
-        <td>${m.name || "—"}</td>
-        <td><a href="mailto:${m.email}">${m.email || "—"}</a></td>
-        <td><a href="tel:${m.phone}">${m.phone || "—"}</a></td>
+        <td>${m.name || "-"}</td>
+        <td><a href="mailto:${m.email}">${m.email || "-"}</a></td>
+        <td><a href="tel:${m.phone}">${m.phone || "-"}</a></td>
         <td><span class="admin-status admin-status-${status === "active" ? "confirmed" : status === "past_due" ? "pending_payment" : "cancelled"}">${statusLabel[status] || status}</span></td>
         <td>${fmtMembershipDate(m.membership.currentPeriodEnd)}</td>
         <td>
@@ -220,7 +220,7 @@ async function loadMemberships() {
 async function handleMembershipAction(action, uid) {
   try {
     if (action === "cancel") {
-      if (!confirm("Manually cancel this membership? This is a manual override — normally cancellation happens automatically via Stripe. The member should also cancel their subscription in Stripe so they stop being billed.")) return;
+      if (!confirm("Manually cancel this membership? This is a manual override. Cancellation normally happens automatically via Stripe. The member should also cancel their subscription in Stripe so they stop being billed.")) return;
       await authDb.collection("users").doc(uid).update({ "membership.status": "cancelled" });
     } else if (action === "reactivate") {
       await authDb.collection("users").doc(uid).update({ "membership.status": "active" });
@@ -241,9 +241,9 @@ function renderCustomersTable(customers) {
 
   tbody.innerHTML = customers.map((c) => `
     <tr>
-      <td>${c.name || "—"}</td>
-      <td><a href="mailto:${c.email}">${c.email || "—"}</a></td>
-      <td><a href="tel:${c.phone}">${c.phone || "—"}</a></td>
+      <td>${c.name || "-"}</td>
+      <td><a href="mailto:${c.email}">${c.email || "-"}</a></td>
+      <td><a href="tel:${c.phone}">${c.phone || "-"}</a></td>
       <td>${fmtCreated(c.createdAt)}</td>
     </tr>
   `).join("");
@@ -341,7 +341,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const isAdmin = await checkIsAdmin(user.uid);
     if (!isAdmin) {
       document.getElementById("admin-wrap").innerHTML =
-        '<div class="notice">This account doesn\'t have admin access. If this is a mistake, add your account to the "admins" collection in Firestore — see README.md.</div>';
+        '<div class="notice">This account doesn\'t have admin access. If this is a mistake, add your account to the "admins" collection in Firestore (see README.md).</div>';
       return;
     }
     loadBookings();

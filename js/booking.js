@@ -98,7 +98,7 @@ function sessionKey(classType, date, time) {
 // Classes don't start until launch day — no bookable date will ever be
 // offered before this, even once "tomorrow" catches up to it. Once launch
 // day has passed, this has no effect and dates just start from tomorrow.
-const FIRST_BOOKABLE_DATE = "2026-09-07";
+const FIRST_BOOKABLE_DATE = "2026-10-05";
 
 function nextWeekdays(count) {
   const dates = [];
@@ -142,7 +142,7 @@ function renderDateGrid() {
 
   const dates = nextWeekdays(10);
   const cfg = CLASS_TYPES[selectedClassType];
-  document.getElementById("date-grid-label").textContent = `${cfg.label} — choose a date`;
+  document.getElementById("date-grid-label").textContent = `${cfg.label}: choose a date`;
 
   grid.innerHTML = dates.map((d) => {
     const key = dateKey(d);
@@ -330,7 +330,7 @@ async function submitBooking(e) {
     // credits or a Pay Now button.
     membershipRow.classList.remove("booking-hidden");
     membershipBtn.disabled = false;
-    membershipBtn.textContent = "Book Free — Membership";
+    membershipBtn.textContent = "Book Free (Membership)";
     membershipBtn.onclick = () => redeemMembership(bookingId);
     creditRow.classList.add("booking-hidden");
     payBtn.classList.add("booking-hidden");
@@ -342,7 +342,10 @@ async function submitBooking(e) {
   payBtn.classList.remove("booking-hidden");
   paymentNote.classList.remove("booking-hidden");
 
-  if (availableCredits > 0 && creditPackageId) {
+  // Members never see the credit option, even on Kids Fitness (which
+  // membership doesn't cover) — membership already replaces the need for
+  // packages/credits entirely.
+  if (availableCredits > 0 && creditPackageId && !hasActiveMembership) {
     creditRow.classList.remove("booking-hidden");
     creditBtn.textContent = `Use 1 Class Credit (${availableCredits} available)`;
     creditBtn.disabled = false;
@@ -355,7 +358,7 @@ async function submitBooking(e) {
   payBtn.textContent = "Pay Now →";
   payBtn.onclick = () => {
     if (cfg.stripeLink.startsWith("PASTE_")) {
-      alert("Stripe isn't connected yet for this class — this button will redirect to Stripe Checkout once the payment link is added in js/booking.js.");
+      alert("Stripe isn't connected yet for this class. This button will redirect to Stripe Checkout once the payment link is added in js/booking.js.");
       return;
     }
     const url = new URL(cfg.stripeLink);
@@ -388,7 +391,7 @@ async function redeemCredit(bookingId, sKey) {
     await authDb.runTransaction(async (tx) => {
       const pkgDoc = await tx.get(packageRef);
       if (!pkgDoc.exists || (pkgDoc.data().creditsRemaining || 0) <= 0) {
-        throw new Error("That credit isn't available anymore — please pay for this class instead.");
+        throw new Error("That credit isn't available anymore. Please pay for this class instead.");
       }
       tx.update(packageRef, { creditsRemaining: pkgDoc.data().creditsRemaining - 1 });
       tx.update(bookingRef, { status: "confirmed", paidWithCredit: true, packageId: creditPackageId });
@@ -398,7 +401,7 @@ async function redeemCredit(bookingId, sKey) {
     payBtn.classList.add("booking-hidden");
     document.getElementById("payment-note").classList.add("booking-hidden");
     const successEl = document.getElementById("payment-success");
-    successEl.textContent = "Booking confirmed using a class credit — see you there!";
+    successEl.textContent = "Booking confirmed using a class credit, see you there!";
     successEl.classList.remove("booking-hidden");
   } catch (err) {
     errorEl.textContent = err.message.replace("Firebase: ", "");
@@ -430,13 +433,13 @@ async function redeemMembership(bookingId) {
     payBtn.classList.add("booking-hidden");
     document.getElementById("payment-note").classList.add("booking-hidden");
     const successEl = document.getElementById("payment-success");
-    successEl.textContent = "Booking confirmed with your membership — see you there!";
+    successEl.textContent = "Booking confirmed with your membership, see you there!";
     successEl.classList.remove("booking-hidden");
   } catch (err) {
     errorEl.textContent = err.message.replace("Firebase: ", "");
     errorEl.classList.remove("booking-hidden");
     membershipBtn.disabled = false;
-    membershipBtn.textContent = "Book Free — Membership";
+    membershipBtn.textContent = "Book Free (Membership)";
   }
 }
 

@@ -2,7 +2,7 @@
 
 Static site for Courtside Wellness, a women's fitness and wellness community in Minto NSW, hosted inside Padel Spot Minto (Mat Pilates, Mums and Bubs, Fitness Class $20 · Kids Fitness $15, open to all kids) — HTML/CSS/JS, no build step. Includes guest + member booking, live capacity tracking, member accounts, class packages, a $40/week membership, and an admin dashboard. Payments run through Stripe, with a small Firebase Cloud Function (see **4c**) confirming bookings/packages/memberships automatically as Stripe reports them.
 
-Classes start Monday 7 September 2026 — `FIRST_BOOKABLE_DATE` in `js/booking.js` stops the date picker from offering anything earlier. Once that date passes it has no effect.
+Classes start Monday 5 October 2026. `FIRST_BOOKABLE_DATE` in `js/booking.js` stops the date picker from offering anything earlier. Once that date passes it has no effect.
 
 ## Files
 

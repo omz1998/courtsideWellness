@@ -39,7 +39,7 @@ async function loadMyCredits(uid) {
     snap.forEach((doc) => { total += doc.data().creditsRemaining || 0; });
 
     box.innerHTML = total > 0
-      ? `<div class="notice">You have <strong>${total} class credit${total === 1 ? "" : "s"}</strong> ready to use — pick "Use a class credit" at checkout when you book.</div>`
+      ? `<div class="notice">You have <strong>${total} class credit${total === 1 ? "" : "s"}</strong> ready to use. Pick "Use a class credit" at checkout when you book.</div>`
       : "";
   } catch (err) {
     console.warn("Couldn't load class credits:", err);
@@ -57,7 +57,7 @@ async function buyPackage(packKey) {
   }
 
   if (cfg.stripeLink.startsWith("PASTE_")) {
-    errorEl.textContent = "Packages aren't set up for payment yet — see the Stripe setup note in js/packages.js.";
+    errorEl.textContent = "Packages aren't set up for payment yet. See the Stripe setup note in js/packages.js.";
     errorEl.classList.remove("booking-hidden");
     return;
   }

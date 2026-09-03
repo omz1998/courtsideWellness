@@ -29,7 +29,7 @@ async function loadMembershipStatus(uid) {
     const m = profile && profile.membership;
 
     if (m && m.status === "active") {
-      box.innerHTML = `<div class="notice">You're an active member — enjoy unlimited classes and full Padel Spot Minto access. Next renewal: ${fmtMembershipDate(m.currentPeriodEnd)}.</div>`;
+      box.innerHTML = `<div class="notice">You're an active member. Enjoy unlimited classes and full Padel Spot Minto access. Next renewal: ${fmtMembershipDate(m.currentPeriodEnd)}.</div>`;
       if (joinBtn) joinBtn.classList.add("booking-hidden");
     } else if (m && m.status === "past_due") {
       box.innerHTML = `<div class="notice">Your last membership payment didn't go through. Please check your card details with Stripe, or <a href="contact.html" style="text-decoration: underline;">contact us</a> for help.</div>`;
@@ -46,12 +46,15 @@ async function joinMembership() {
   errorEl.classList.add("booking-hidden");
 
   if (!membershipUser) {
-    location.href = "login.html?redirect=" + encodeURIComponent("membership.html");
+    // Most people clicking Join Now won't have an account yet, so default to
+    // sign up rather than login (existing members can still cross over to
+    // login from the sign-up page).
+    location.href = "signup.html?redirect=" + encodeURIComponent("membership.html");
     return;
   }
 
   if (MEMBERSHIP_STRIPE_LINK.startsWith("PASTE_")) {
-    errorEl.textContent = "Membership isn't set up for payment yet — see the Stripe setup note in js/membership.js.";
+    errorEl.textContent = "Membership isn't set up for payment yet. See the Stripe setup note in js/membership.js.";
     errorEl.classList.remove("booking-hidden");
     return;
   }
@@ -75,7 +78,7 @@ async function joinMembership() {
       + " If this keeps happening, contact us directly.";
     errorEl.classList.remove("booking-hidden");
     btn.disabled = false;
-    btn.textContent = "Join Now — $40/week";
+    btn.textContent = "Join Now ($40/week)";
   }
 }
 
