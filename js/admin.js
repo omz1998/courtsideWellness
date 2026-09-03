@@ -19,20 +19,17 @@ const DEMO_PACKAGES = [
   { id: "pkgdemo3", name: "Grace Kim", email: "grace.kim@example.com", phone: "0456 789 012", label: "5-Class Pack", price: 80, credits: 5, creditsRemaining: 2, status: "confirmed", createdAt: demoTimestamp(-15) },
 ];
 
-const DEMO_MEMBERSHIPS = [
-  { id: "sarah", name: "Sarah Chen", email: "sarah.chen@example.com", phone: "0412 345 678", membership: { status: "active", currentPeriodEnd: demoTimestamp(4) } },
-  { id: "priya", name: "Priya Nair", email: "priya.nair@example.com", phone: "0423 456 789", membership: { status: "past_due", currentPeriodEnd: demoTimestamp(-1) } },
-  { id: "grace", name: "Grace Kim", email: "grace.kim@example.com", phone: "0456 789 012", membership: { status: "cancelled", currentPeriodEnd: demoTimestamp(-10) } },
-];
-
-const DEMO_CUSTOMERS = [
-  { name: "Sarah Chen", email: "sarah.chen@example.com", phone: "0412 345 678", createdAt: demoTimestamp(-40) },
-  { name: "Priya Nair", email: "priya.nair@example.com", phone: "0423 456 789", createdAt: demoTimestamp(-33) },
-  { name: "Jess Taylor", email: "jess.taylor@example.com", phone: "0434 567 890", createdAt: demoTimestamp(-21) },
-  { name: "Amelia Ward", email: "amelia.ward@example.com", phone: "0445 678 901", createdAt: demoTimestamp(-14) },
-  { name: "Grace Kim", email: "grace.kim@example.com", phone: "0456 789 012", createdAt: demoTimestamp(-9) },
-  { name: "Olivia Brooks", email: "olivia.brooks@example.com", phone: "0467 890 123", createdAt: demoTimestamp(-5) },
-  { name: "Mia Robertson", email: "mia.robertson@example.com", phone: "0478 901 234", createdAt: demoTimestamp(-2) },
+// One combined list of every signed-up customer, whether or not they have a
+// membership — mirrors what loadMembers() builds from the real "users"
+// collection (a membership is just an optional field on a user's profile).
+const DEMO_MEMBERS = [
+  { id: "sarah", name: "Sarah Chen", email: "sarah.chen@example.com", phone: "0412 345 678", createdAt: demoTimestamp(-40), membership: { status: "active", currentPeriodEnd: demoTimestamp(4) } },
+  { id: "priya", name: "Priya Nair", email: "priya.nair@example.com", phone: "0423 456 789", createdAt: demoTimestamp(-33), membership: { status: "past_due", currentPeriodEnd: demoTimestamp(-1) } },
+  { id: "jess", name: "Jess Taylor", email: "jess.taylor@example.com", phone: "0434 567 890", createdAt: demoTimestamp(-21) },
+  { id: "amelia", name: "Amelia Ward", email: "amelia.ward@example.com", phone: "0445 678 901", createdAt: demoTimestamp(-14) },
+  { id: "grace", name: "Grace Kim", email: "grace.kim@example.com", phone: "0456 789 012", createdAt: demoTimestamp(-9), membership: { status: "cancelled", currentPeriodEnd: demoTimestamp(-2) } },
+  { id: "olivia", name: "Olivia Brooks", email: "olivia.brooks@example.com", phone: "0467 890 123", createdAt: demoTimestamp(-5) },
+  { id: "mia", name: "Mia Robertson", email: "mia.robertson@example.com", phone: "0478 901 234", createdAt: demoTimestamp(-2) },
 ];
 
 function nextWeekday(offsetDays) {
@@ -166,11 +163,14 @@ function fmtMembershipDate(ts) {
   return d.toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" });
 }
 
-function renderMembershipsTable(members, interactive) {
-  const tbody = document.getElementById("memberships-tbody");
+// Every signed-up customer, with membership status/renewal alongside — a
+// membership is just an optional field on a user's profile, so "Members"
+// here means everyone with an account, not only paying members.
+function renderMembersTable(members, interactive) {
+  const tbody = document.getElementById("members-tbody");
 
   if (members.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6">No members yet.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7">No members match that search.</td></tr>`;
     return;
   }
 
@@ -179,22 +179,38 @@ function renderMembershipsTable(members, interactive) {
     past_due: "Past due",
     cancelled: "Cancelled"
   };
+  const statusClass = {
+    active: "confirmed",
+    past_due: "pending_payment",
+    cancelled: "cancelled"
+  };
 
   tbody.innerHTML = members.map((m) => {
-    const status = m.membership.status;
+    const status = m.membership && m.membership.status;
+    const statusHtml = status
+      ? `<span class="admin-status admin-status-${statusClass[status] || "cancelled"}">${statusLabel[status] || status}</span>`
+      : `<span style="color: var(--ink-soft); font-size: 0.85rem;">Not a member</span>`;
+    const renewal = status === "active" ? fmtMembershipDate(m.membership.currentPeriodEnd) : "-";
+
+    let actionsHtml = "-";
+    if (interactive && status) {
+      actionsHtml = `
+        ${status !== "active" ? `<button class="btn btn-outline admin-membership-action" data-action="reactivate" data-id="${m.id}">Reactivate</button>` : ""}
+        ${status !== "cancelled" ? `<button class="btn btn-outline admin-membership-action" data-action="cancel" data-id="${m.id}">Cancel</button>` : ""}
+      `;
+    } else if (!interactive) {
+      actionsHtml = `<span style="color: var(--ink-soft); font-size: 0.85rem;">Sample data</span>`;
+    }
+
     return `
       <tr>
         <td>${m.name || "-"}</td>
         <td><a href="mailto:${m.email}">${m.email || "-"}</a></td>
         <td><a href="tel:${m.phone}">${m.phone || "-"}</a></td>
-        <td><span class="admin-status admin-status-${status === "active" ? "confirmed" : status === "past_due" ? "pending_payment" : "cancelled"}">${statusLabel[status] || status}</span></td>
-        <td>${fmtMembershipDate(m.membership.currentPeriodEnd)}</td>
-        <td>
-          ${interactive ? `
-            ${status !== "active" ? `<button class="btn btn-outline admin-membership-action" data-action="reactivate" data-id="${m.id}">Reactivate</button>` : ""}
-            ${status !== "cancelled" ? `<button class="btn btn-outline admin-membership-action" data-action="cancel" data-id="${m.id}">Cancel</button>` : ""}
-          ` : `<span style="color: var(--ink-soft); font-size: 0.85rem;">Sample data</span>`}
-        </td>
+        <td>${fmtCreated(m.createdAt)}</td>
+        <td>${statusHtml}</td>
+        <td>${renewal}</td>
+        <td>${actionsHtml}</td>
       </tr>
     `;
   }).join("");
@@ -206,15 +222,24 @@ function renderMembershipsTable(members, interactive) {
   }
 }
 
-async function loadMemberships() {
+let allMembers = [];
+
+async function loadMembers() {
   const snap = await authDb.collection("users").get();
   const members = [];
-  snap.forEach((doc) => {
-    const data = doc.data();
-    if (data.membership) members.push({ id: doc.id, ...data });
-  });
+  snap.forEach((doc) => members.push({ id: doc.id, ...doc.data() }));
   members.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
-  renderMembershipsTable(members, true);
+  allMembers = members;
+  filterMembers();
+}
+
+function filterMembers() {
+  const input = document.getElementById("members-search");
+  const q = input ? input.value.trim().toLowerCase() : "";
+  const filtered = !q ? allMembers : allMembers.filter((m) =>
+    (m.name || "").toLowerCase().includes(q) || (m.email || "").toLowerCase().includes(q)
+  );
+  renderMembersTable(filtered, !DEMO_MODE);
 }
 
 async function handleMembershipAction(action, uid) {
@@ -225,37 +250,33 @@ async function handleMembershipAction(action, uid) {
     } else if (action === "reactivate") {
       await authDb.collection("users").doc(uid).update({ "membership.status": "active" });
     }
-    loadMemberships();
+    loadMembers();
   } catch (err) {
     alert("Action failed: " + err.message.replace("Firebase: ", ""));
   }
 }
 
-function renderCustomersTable(customers) {
-  const tbody = document.getElementById("customers-tbody");
-
-  if (customers.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="4">No customers yet.</td></tr>`;
-    return;
-  }
-
-  tbody.innerHTML = customers.map((c) => `
-    <tr>
-      <td>${c.name || "-"}</td>
-      <td><a href="mailto:${c.email}">${c.email || "-"}</a></td>
-      <td><a href="tel:${c.phone}">${c.phone || "-"}</a></td>
-      <td>${fmtCreated(c.createdAt)}</td>
-    </tr>
-  `).join("");
-}
+let allBookings = [];
 
 async function loadBookings() {
   const snap = await authDb.collection("bookings").get();
   const bookings = [];
   snap.forEach((doc) => bookings.push({ id: doc.id, ...doc.data() }));
   bookings.sort((a, b) => (a.date || "").localeCompare(b.date || ""));
+  allBookings = bookings;
   loadStats(bookings);
-  renderBookingsTable(bookings, true);
+  filterBookings();
+}
+
+function filterBookings() {
+  const input = document.getElementById("bookings-search");
+  const q = input ? input.value.trim().toLowerCase() : "";
+  const filtered = !q ? allBookings : allBookings.filter((b) =>
+    (b.name || "").toLowerCase().includes(q) ||
+    (b.email || "").toLowerCase().includes(q) ||
+    (b.classLabel || "").toLowerCase().includes(q)
+  );
+  renderBookingsTable(filtered, !DEMO_MODE);
 }
 
 async function loadPackages() {
@@ -278,14 +299,6 @@ async function handlePackageAction(action, packageId) {
   } catch (err) {
     alert("Action failed: " + err.message.replace("Firebase: ", ""));
   }
-}
-
-async function loadCustomers() {
-  const snap = await authDb.collection("users").get();
-  const customers = [];
-  snap.forEach((doc) => customers.push({ id: doc.id, ...doc.data() }));
-  customers.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
-  renderCustomersTable(customers);
 }
 
 async function handleAction(action, bookingId, dateStr, timeStr, classType) {
@@ -318,15 +331,36 @@ function loadDemo() {
   banner.innerHTML = "<strong>Preview mode.</strong> Firebase isn't connected yet, so this is sample data so you can see the layout. Follow the README to connect Firebase and this becomes your real dashboard.";
   document.getElementById("admin-wrap").prepend(banner);
 
+  allBookings = DEMO_BOOKINGS;
   loadStats(DEMO_BOOKINGS);
   renderBookingsTable(DEMO_BOOKINGS, false);
   renderPackagesTable(DEMO_PACKAGES, false);
-  renderMembershipsTable(DEMO_MEMBERSHIPS, false);
-  renderCustomersTable(DEMO_CUSTOMERS);
+  allMembers = DEMO_MEMBERS;
+  renderMembersTable(DEMO_MEMBERS, false);
+}
+
+function initAdminTabs() {
+  document.querySelectorAll(".admin-tab").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".admin-tab").forEach((t) => t.classList.remove("active"));
+      tab.classList.add("active");
+      document.querySelectorAll(".admin-tab-panel").forEach((panel) => panel.classList.add("booking-hidden"));
+      const panel = document.getElementById(`tab-${tab.dataset.tab}`);
+      if (panel) panel.classList.remove("booking-hidden");
+    });
+  });
+
+  const bookingsSearch = document.getElementById("bookings-search");
+  if (bookingsSearch) bookingsSearch.addEventListener("input", filterBookings);
+
+  const membersSearch = document.getElementById("members-search");
+  if (membersSearch) membersSearch.addEventListener("input", filterMembers);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   if (!document.getElementById("bookings-tbody")) return; // not on admin page
+
+  initAdminTabs();
 
   if (DEMO_MODE) {
     loadDemo();
@@ -346,7 +380,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     loadBookings();
     loadPackages();
-    loadMemberships();
-    loadCustomers();
+    loadMembers();
   });
 });

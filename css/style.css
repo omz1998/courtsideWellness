@@ -882,6 +882,50 @@ h2 {
 .admin-status-confirmed { background: #E7F5EC; color: #1E6B3E; }
 .admin-status-cancelled { background: #FCE8E6; color: #B3261E; }
 
+.admin-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.admin-tab {
+  padding: 10px 22px;
+  border-radius: 999px;
+  border: 1.5px solid var(--cream-dark);
+  background: var(--white);
+  font-weight: 600;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.admin-tab:hover { border-color: var(--pink); }
+
+.admin-tab.active {
+  background: var(--gradient-pink);
+  border-color: transparent;
+  color: var(--white) !important;
+}
+
+.admin-search {
+  width: 100%;
+  max-width: 360px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1.5px solid var(--cream-dark);
+  font-size: 0.9rem;
+  font-family: inherit;
+  margin-bottom: 20px;
+}
+
+.admin-search:focus {
+  outline: none;
+  border-color: var(--pink);
+}
+
 /* ---------- Class type selector (booking step 1) ---------- */
 
 .class-type-grid {

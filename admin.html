@@ -34,109 +34,104 @@
 
 <section class="hero" style="padding-bottom: 20px;">
   <span class="eyebrow">Admin</span>
-  <h1>Bookings & Customers</h1>
-  <p class="lead">Everything booked across the studio, and who's booked it.</p>
+  <h1>Admin Dashboard</h1>
+  <p class="lead">Manage bookings and members across the studio.</p>
 </section>
 
 <section style="padding-top: 0;">
   <div class="section-inner reveal" id="admin-wrap">
 
-    <div class="admin-stats">
-      <div class="stat-card">
-        <div class="stat-number" id="stat-upcoming">-</div>
-        <div class="stat-label">Upcoming bookings</div>
+    <div class="admin-tabs">
+      <button type="button" class="admin-tab active" data-tab="bookings">Bookings</button>
+      <button type="button" class="admin-tab" data-tab="members">Members</button>
+    </div>
+
+    <div id="tab-bookings" class="admin-tab-panel">
+      <div class="admin-stats">
+        <div class="stat-card">
+          <div class="stat-number" id="stat-upcoming">-</div>
+          <div class="stat-label">Upcoming bookings</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="stat-pending">-</div>
+          <div class="stat-label">Pending payment</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="stat-confirmed">-</div>
+          <div class="stat-label">Confirmed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="stat-revenue">-</div>
+          <div class="stat-label">Confirmed revenue</div>
+        </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-number" id="stat-pending">-</div>
-        <div class="stat-label">Pending payment</div>
+
+      <span class="section-label">All Bookings</span>
+      <input type="text" id="bookings-search" class="admin-search" placeholder="Search bookings by name, email, or class...">
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Class Date</th>
+              <th>Class</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Price</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="bookings-tbody">
+            <tr><td colspan="8">Loading…</td></tr>
+          </tbody>
+        </table>
       </div>
-      <div class="stat-card">
-        <div class="stat-number" id="stat-confirmed">-</div>
-        <div class="stat-label">Confirmed</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number" id="stat-revenue">-</div>
-        <div class="stat-label">Confirmed revenue</div>
+
+      <span class="section-label">Class Packages</span>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Purchased</th>
+              <th>Pack</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Price</th>
+              <th>Credits Left</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="packages-tbody">
+            <tr><td colspan="9">Loading…</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
-    <span class="section-label">All Bookings</span>
-    <div class="admin-table-wrap">
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th>Class Date</th>
-            <th>Class</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Price</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="bookings-tbody">
-          <tr><td colspan="8">Loading…</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <span class="section-label">Class Packages</span>
-    <div class="admin-table-wrap">
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th>Purchased</th>
-            <th>Pack</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Price</th>
-            <th>Credits Left</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="packages-tbody">
-          <tr><td colspan="9">Loading…</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <span class="section-label">Memberships</span>
-    <div class="admin-table-wrap">
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Status</th>
-            <th>Next Renewal</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="memberships-tbody">
-          <tr><td colspan="6">Loading…</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <span class="section-label">All Customers</span>
-    <div class="admin-table-wrap">
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Joined</th>
-          </tr>
-        </thead>
-        <tbody id="customers-tbody">
-          <tr><td colspan="4">Loading…</td></tr>
-        </tbody>
-      </table>
+    <div id="tab-members" class="admin-tab-panel booking-hidden">
+      <span class="section-label">Members</span>
+      <input type="text" id="members-search" class="admin-search" placeholder="Search members by name or email...">
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Joined</th>
+              <th>Membership Status</th>
+              <th>Next Renewal</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="members-tbody">
+            <tr><td colspan="7">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
   </div>
