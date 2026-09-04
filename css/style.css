@@ -667,8 +667,7 @@ h2 {
   font-size: 0.9rem;
 }
 
-.capacity-status.needs-more { background: #FFF4E5; color: #8A5A00; }
-.capacity-status.confirmed { background: #E7F5EC; color: #1E6B3E; }
+.capacity-status.info { background: var(--pink-soft); color: var(--pink-dark); font-weight: 600; }
 
 .form-grid {
   display: grid;

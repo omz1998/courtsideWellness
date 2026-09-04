@@ -8,40 +8,41 @@
 // Each class type has its own fixed session time(s), Mon-Fri. "times" uses
 // 24hr "HH:MM" — these are the only times that will ever show as bookable
 // for that class.
+// Kids Fitness isn't in here — it launches as a school-holiday pilot rather
+// than a regular Mon-Fri class, so it isn't part of the normal date-driven
+// booking flow yet. See booking.html for its "register interest" note. Once
+// real school-holiday dates are confirmed, it can be added back in here.
 const CLASS_TYPES = {
   pilates: {
     label: "Mat Pilates",
     price: 20,
     capacity: 30,
-    min: 8,
     times: ["10:00"],
     // Live Stripe Payment Link: "Standard Class - Courtside Wellness" ($20).
     stripeLink: "https://buy.stripe.com/9B6aEZcoVcc6bvK7673ZK06"
-  },
-  kids: {
-    label: "Kids Fitness",
-    price: 15,
-    capacity: 30,
-    min: 8,
-    times: ["10:00", "11:00"],
-    // Live Stripe Payment Link: "Kids Fitness Class - Courtside Wellness" ($15).
-    stripeLink: "https://buy.stripe.com/28E3cx0Gd8ZU57mcqr3ZK09"
   },
   mumsbubs: {
     label: "Mums and Bubs",
     price: 20,
     capacity: 30,
-    min: 8,
     times: ["11:00"],
     // Reuses the $20 Standard Class Stripe link (same price point).
     stripeLink: "https://buy.stripe.com/9B6aEZcoVcc6bvK7673ZK06"
   },
-  fitness: {
-    label: "Fitness Class",
+  strength: {
+    label: "Women's Fitness & Strength",
     price: 20,
     capacity: 30,
-    min: 8,
     times: ["12:30"],
+    // Reuses the $20 Standard Class Stripe link (same price point).
+    stripeLink: "https://buy.stripe.com/9B6aEZcoVcc6bvK7673ZK06"
+  },
+  gymfitness: {
+    label: "Women's Gym Fitness Classes",
+    price: 20,
+    capacity: 30,
+    // Placeholder time slot — change this if a different time suits better.
+    times: ["17:30"],
     // Reuses the $20 Standard Class Stripe link (same price point).
     stripeLink: "https://buy.stripe.com/9B6aEZcoVcc6bvK7673ZK06"
   }
@@ -54,7 +55,7 @@ function formatTime(t) {
   return `${h12}:${String(m).padStart(2, "0")}${period}`;
 }
 
-let selectedClassType = null; // "pilates" | "kids"
+let selectedClassType = null; // "pilates" | "mumsbubs" | "strength" | "gymfitness"
 let selectedDate = null;      // "YYYY-MM-DD"
 let selectedTime = null;      // "HH:MM" (24hr)
 let sessionsCache = {};       // sessionKey -> { booked, capacity, min }
@@ -63,10 +64,10 @@ let availableCredits = 0;     // total class credits across the user's confirmed
 let creditPackageId = null;   // the (oldest) package doc to redeem a credit from first
 let hasActiveMembership = false; // true if the logged-in user has an active $40/week membership
 
-// Membership covers unlimited bookings on these class types only — Kids
-// Fitness stays pay-per-class regardless of membership, since it's already
-// positioned separately (open to all kids, not just members).
-const MEMBERSHIP_CLASS_TYPES = ["pilates", "mumsbubs", "fitness"];
+// Membership covers unlimited bookings on all four women's classes. Kids
+// Fitness isn't part of this list since it's a separate school-holiday
+// pilot, not a regular bookable class yet.
+const MEMBERSHIP_CLASS_TYPES = ["pilates", "mumsbubs", "strength", "gymfitness"];
 
 // Class credits (from a 5- or 10-Class Pack) are generic — usable on any
 // class type, regardless of which pack they came from.
@@ -122,10 +123,10 @@ function dateKey(d) {
 
 async function fetchSpots(classType, dateStr, time) {
   const cfg = CLASS_TYPES[classType];
-  if (!authReady) return { booked: 0, capacity: cfg.capacity, min: cfg.min };
+  if (!authReady) return { booked: 0, capacity: cfg.capacity };
   const doc = await authDb.collection("sessions").doc(sessionKey(classType, dateStr, time)).get();
   if (doc.exists) return doc.data();
-  return { booked: 0, capacity: cfg.capacity, min: cfg.min };
+  return { booked: 0, capacity: cfg.capacity };
 }
 
 function selectClassType(type) {
@@ -223,19 +224,13 @@ async function renderTimeGrid() {
 function updateCapacityStatus() {
   const box = document.getElementById("capacity-status");
   if (!box || !selectedDate || !selectedTime || !selectedClassType) return;
-  box.classList.remove("booking-hidden");
+  box.classList.remove("booking-hidden", "needs-more", "confirmed");
+  box.classList.add("info");
   const info = sessionsCache[sessionKey(selectedClassType, selectedDate, selectedTime)];
-  const remaining = info.capacity - info.booked;
-  const afterThis = info.booked + 1;
-
-  box.classList.remove("needs-more", "confirmed");
-  if (afterThis >= info.min) {
-    box.classList.add("confirmed");
-    box.textContent = `This class has enough people booked to run (min ${info.min}). ${remaining} spots left.`;
-  } else {
-    box.classList.add("needs-more");
-    box.textContent = `${info.min - info.booked} more booking(s) needed for this class to run. ${remaining} spots left of ${info.capacity}.`;
-  }
+  const remaining = Math.max(info.capacity - info.booked, 0);
+  box.textContent = remaining <= 0
+    ? "This session is full."
+    : `${remaining} spot${remaining === 1 ? "" : "s"} left in this class.`;
 }
 
 function goToStep(step) {
@@ -291,11 +286,10 @@ async function submitBooking(e) {
       const sRef = authDb.collection("sessions").doc(sessionKey(selectedClassType, selectedDate, selectedTime));
       await authDb.runTransaction(async (tx) => {
         const doc = await tx.get(sRef);
-        const current = doc.exists ? doc.data() : { booked: 0, capacity: cfg.capacity, min: cfg.min };
+        const current = doc.exists ? doc.data() : { booked: 0, capacity: cfg.capacity };
         tx.set(sRef, {
           booked: (current.booked || 0) + 1,
-          capacity: current.capacity || cfg.capacity,
-          min: current.min || cfg.min
+          capacity: current.capacity || cfg.capacity
         });
       });
     }
