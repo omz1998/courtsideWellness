@@ -312,10 +312,9 @@ Note: only works once your .com.au registration is finalized (ABN/business name 
 - Stripe payment links ($80 and $160) in `js/packages.js` for the class packages
 - Stripe recurring payment link ($40/week) in `js/membership.js` for membership — see **4d**
 - Instructor name/bio (not yet on any page)
-- WhatsApp Business profile — contact.html says "coming soon" until you set one up (see note below)
 - Web3Forms access key in `js/message.js` — the "Message Us" popup won't send until this is set (see above)
 - Stripe webhook setup (**4c** above) — until done, payments/memberships are confirmed manually via "Mark Paid" / the Memberships table in admin.html
 
 ## WhatsApp Business
 
-`contact.html` currently just says "WhatsApp: coming soon" since there's no number to link yet. Once you set up the WhatsApp Business profile, using **"Courtside Wellness"** as the display name keeps it consistent with the rest of the brand and makes it findable by name. After that's live, replace the "coming soon" text with a real link in the form `https://wa.me/61XXXXXXXXX` (Australian number, no leading 0, no spaces/dashes).
+`contact.html` links to the Courtside Wellness WhatsApp Business profile (`https://wa.me/message/SUJKPJ3KUN5GH1`). If you ever need to update it, replace that URL in `contact.html` with the new one from your WhatsApp Business profile.

@@ -80,7 +80,16 @@ async function getUserProfile(uid) {
 
 async function updateUserProfile(uid, data) {
   requireAuthReady();
-  await authDb.collection("users").doc(uid).set(data, { merge: true });
+  const ref = authDb.collection("users").doc(uid);
+  // Backfills "joined" date for accounts whose profile doc was never created
+  // at sign-up (e.g. a rules hiccup at the time), so admin can still show a
+  // real Joined date instead of "-" once they've saved anything here.
+  const existing = await ref.get();
+  const needsCreatedAt = !existing.exists || !existing.data().createdAt;
+  await ref.set(
+    needsCreatedAt ? { ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() } : data,
+    { merge: true }
+  );
 }
 
 // Returns true if this uid has a doc in the "admins" collection.

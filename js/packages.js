@@ -52,7 +52,7 @@ async function buyPackage(packKey) {
   errorEl.classList.add("booking-hidden");
 
   if (!packagesUser) {
-    location.href = "login.html?redirect=" + encodeURIComponent("packages.html");
+    location.href = "signup.html?redirect=" + encodeURIComponent("packages.html");
     return;
   }
 
@@ -113,7 +113,7 @@ document.addEventListener("DOMContentLoaded", () => {
   onAuthReady((user) => {
     packagesUser = user || null;
     if (!user) {
-      location.href = "login.html?redirect=" + encodeURIComponent("packages.html");
+      location.href = "signup.html?redirect=" + encodeURIComponent("packages.html");
       return;
     }
     loadMyCredits(user.uid);
