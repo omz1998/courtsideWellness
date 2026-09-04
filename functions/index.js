@@ -24,6 +24,42 @@ const db = admin.firestore();
 // (see README.md for the full setup steps)
 const stripeWebhookSecret = defineSecret("STRIPE_WEBHOOK_SECRET");
 
+// Same free Web3Forms access key already used by js/message.js for the
+// "Message Us" popup — Web3Forms keys aren't sensitive (they're designed to
+// be embedded in public HTML forms), so this can just be pasted in directly.
+// Get one at https://web3forms.com if you haven't already (see README).
+const WEB3FORMS_ACCESS_KEY = "PASTE_WEB3FORMS_ACCESS_KEY";
+
+// Emails admin@courtsidewellness.com.au for new memberships and package
+// purchases. Failures here are only logged, never thrown — a notification
+// email going missing shouldn't stop the actual booking/package/membership
+// from being confirmed.
+async function notifyAdmin(subject, message) {
+  if (WEB3FORMS_ACCESS_KEY === "PASTE_WEB3FORMS_ACCESS_KEY") {
+    logger.warn("Skipping admin notification email — WEB3FORMS_ACCESS_KEY not set in functions/index.js yet.");
+    return;
+  }
+  try {
+    const res = await fetch("https://api.web3forms.com/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({
+        access_key: WEB3FORMS_ACCESS_KEY,
+        subject,
+        from_name: "Courtside Wellness Website",
+        email: "admin@courtsidewellness.com.au",
+        message
+      })
+    });
+    const data = await res.json();
+    if (!data.success) {
+      logger.error("Web3Forms admin notification failed:", data.message || data);
+    }
+  } catch (err) {
+    logger.error("Error sending admin notification email:", err);
+  }
+}
+
 exports.stripeWebhook = onRequest(
   { secrets: [stripeWebhookSecret], region: "australia-southeast1" },
   async (req, res) => {
@@ -53,10 +89,25 @@ exports.stripeWebhook = onRequest(
             logger.info(`Session ${session.id} not yet paid (status: ${session.payment_status}) — skipping.`);
             break;
           }
+          const buyerName = session.customer_details?.name || "-";
+          const buyerEmail = session.customer_details?.email || "-";
+
           if (session.mode === "subscription") {
             await activateMembership(session.client_reference_id, session.subscription, session.customer);
+            await notifyAdmin(
+              "New member joined Courtside Wellness",
+              `A new membership just started.\n\nName: ${buyerName}\nEmail: ${buyerEmail}`
+            );
           } else {
-            await confirmFromReference(session.client_reference_id);
+            const ref = session.client_reference_id || "";
+            await confirmFromReference(ref);
+            if (ref.startsWith("package_")) {
+              const amount = session.amount_total != null ? `$${(session.amount_total / 100).toFixed(2)}` : "-";
+              await notifyAdmin(
+                "New class package purchased",
+                `A class package was just purchased.\n\nName: ${buyerName}\nEmail: ${buyerEmail}\nAmount: ${amount}`
+              );
+            }
           }
           break;
         }

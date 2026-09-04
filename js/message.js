@@ -8,7 +8,7 @@
 //   3. Paste it below in place of "PASTE_WEB3FORMS_ACCESS_KEY".
 // Until that's done, the form will show a message explaining it isn't set up yet
 // instead of silently failing.
-const WEB3FORMS_ACCESS_KEY = "PASTE_WEB3FORMS_ACCESS_KEY";
+const WEB3FORMS_ACCESS_KEY = "d24bdd7e-adbe-479c-b7c0-d7ff45af0bc3";
 
 function openMessageModal() {
   const modal = document.getElementById("message-modal");

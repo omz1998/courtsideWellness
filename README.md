@@ -288,6 +288,15 @@ The Contact page has a "Message Us" button that opens a popup form (name, email,
 
 Until that's done, the popup shows a message explaining it isn't set up yet rather than failing silently. There's also a hidden honeypot field for basic spam protection.
 
+### Also used for new member / package purchase emails
+
+The same Web3Forms key powers admin email notifications from the Stripe webhook: `admin@courtsidewellness.com.au` gets an email whenever someone joins as a member or buys a class package (bookings stay silent, on purpose, to avoid a flood of emails).
+
+1. Open `functions/index.js` and replace the second `PASTE_WEB3FORMS_ACCESS_KEY` (near the top, in `notifyAdmin`) with the same key from `js/message.js`.
+2. Redeploy: `firebase deploy --only functions`.
+
+Until that's set, these are just skipped (logged in Functions logs), the booking/package/membership confirmation itself still works either way.
+
 ## 6. Deploy with GitHub Pages
 
 1. Push all files to a GitHub repo's `main` branch (root).
