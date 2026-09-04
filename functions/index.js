@@ -28,7 +28,7 @@ const stripeWebhookSecret = defineSecret("STRIPE_WEBHOOK_SECRET");
 // "Message Us" popup — Web3Forms keys aren't sensitive (they're designed to
 // be embedded in public HTML forms), so this can just be pasted in directly.
 // Get one at https://web3forms.com if you haven't already (see README).
-const WEB3FORMS_ACCESS_KEY = "PASTE_WEB3FORMS_ACCESS_KEY";
+const WEB3FORMS_ACCESS_KEY = "d24bdd7e-adbe-479c-b7c0-d7ff45af0bc3";
 
 // Emails admin@courtsidewellness.com.au for new memberships and package
 // purchases. Failures here are only logged, never thrown — a notification
