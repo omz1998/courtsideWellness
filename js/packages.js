@@ -110,13 +110,11 @@ async function buyPackage(packKey) {
 document.addEventListener("DOMContentLoaded", () => {
   if (!document.getElementById("packages-wrap")) return; // not on the packages page
 
+  // Anyone can view this page, account or not. We only ask for an account
+  // once they actually try to buy, in buyPackage() below.
   onAuthReady((user) => {
     packagesUser = user || null;
-    if (!user) {
-      location.href = "signup.html?redirect=" + encodeURIComponent("packages.html");
-      return;
-    }
-    loadMyCredits(user.uid);
+    if (user) loadMyCredits(user.uid);
   });
 
   document.getElementById("buy-pack5").addEventListener("click", () => buyPackage("pack5"));

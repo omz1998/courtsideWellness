@@ -1,10 +1,27 @@
 // Courtside Wellness — shared interactivity
 
+// Bookings toggle — flip to true once bookings should go live (e.g. closer
+// to 5 October 2026). While false, every "Book a Class" link/button
+// site-wide (nav button, Classes page buttons, Contact page button) is
+// automatically relabelled to "Bookings Open Soon" and disabled, and
+// booking.html itself shows a holding message instead of the booking form.
+// No other file needs to change when you flip this back to true.
+const BOOKINGS_OPEN = false;
+
 document.addEventListener("DOMContentLoaded", () => {
   // Mobile nav toggle
   const toggle = document.querySelector(".nav-toggle");
   const links = document.querySelector(".nav-links");
   const cta = document.querySelector(".nav-cta");
+
+  if (!BOOKINGS_OPEN) {
+    document.querySelectorAll('a[href="booking.html"]').forEach((el) => {
+      el.textContent = "Bookings Open Soon";
+      el.removeAttribute("href");
+      el.classList.add("btn-disabled");
+      el.setAttribute("aria-disabled", "true");
+    });
+  }
 
   if (toggle && links) {
     toggle.addEventListener("click", () => {

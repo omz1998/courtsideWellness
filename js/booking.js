@@ -440,6 +440,22 @@ async function redeemMembership(bookingId) {
 document.addEventListener("DOMContentLoaded", () => {
   if (!document.getElementById("date-grid")) return; // not on booking page
 
+  // BOOKINGS_OPEN is set in js/script.js. While false, show a holding
+  // message instead of the booking form, so visiting this page directly
+  // (not just clicking a disabled nav button) doesn't skip the gate.
+  if (typeof BOOKINGS_OPEN !== "undefined" && !BOOKINGS_OPEN) {
+    const card = document.querySelector(".booking-card");
+    if (card) {
+      card.innerHTML = `
+        <div class="notice" style="text-align: center; padding: 40px 20px;">
+          <h3 style="margin-bottom: 10px;">Bookings open soon</h3>
+          <p>We're putting the finishing touches on our timetable. Bookings open shortly before launch on Monday 5 October 2026. <a href="contact.html" style="text-decoration: underline;">Get in touch</a> to be notified, or check back soon.</p>
+        </div>
+      `;
+    }
+    return;
+  }
+
   document.querySelectorAll(".class-type-option").forEach((el) => {
     el.addEventListener("click", () => selectClassType(el.dataset.type));
   });
