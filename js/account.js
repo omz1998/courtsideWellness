@@ -26,9 +26,23 @@ async function loadProfile(uid) {
   // bailed out entirely when the doc didn't exist, leaving name/email blank
   // even though Firebase already knew them.
   const profile = await getUserProfile(uid);
-  document.getElementById("p-name").value = (profile && profile.name) || currentUser.displayName || "";
-  document.getElementById("p-email").value = (profile && profile.email) || currentUser.email || "";
+  const fallbackName = currentUser.displayName || "";
+  const fallbackEmail = currentUser.email || "";
+  document.getElementById("p-name").value = (profile && profile.name) || fallbackName;
+  document.getElementById("p-email").value = (profile && profile.email) || fallbackEmail;
   document.getElementById("p-phone").value = (profile && profile.phone) || "";
+
+  // Self-heal: if sign-up's Firestore write never landed (no doc, or a doc
+  // missing name entirely), quietly write what we already know from Firebase
+  // Auth right now — so admin sees this member without them needing to
+  // manually open this page and click Save first.
+  if (!profile || !profile.name) {
+    try {
+      await updateUserProfile(uid, { name: fallbackName, email: fallbackEmail });
+    } catch (e) {
+      console.warn("Couldn't self-heal profile doc:", e);
+    }
+  }
 }
 
 // A booking can be moved by its owner if it's upcoming, not cancelled, and

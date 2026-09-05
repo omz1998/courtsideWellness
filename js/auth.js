@@ -42,15 +42,32 @@ async function signUp(name, email, phone, password) {
   // anywhere and no users/{uid} doc, even though sign-up looked like it worked.
   await cred.user.updateProfile({ displayName: name });
 
-  try {
-    await authDb.collection("users").doc(cred.user.uid).set({
-      name, email, phone,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-  } catch (e) {
-    // Don't block sign-up on this — the account still works, and the profile
-    // doc gets created next time they save changes on their account page.
-    console.warn("Couldn't create Firestore profile doc during sign-up:", e);
+  // Force a fresh ID token before writing to Firestore. Right after account
+  // creation, the token the SDK is still holding can occasionally be the
+  // pre-signup one for a brief moment, which the users/{userId} security
+  // rule then sees as request.auth.uid not matching yet, silently failing
+  // the write below. Forcing a refresh here closes that timing gap.
+  await cred.user.getIdToken(true);
+
+  // Retries once on failure (covers any other brief timing hiccup) before
+  // giving up and falling back to the account-page self-heal below.
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      await authDb.collection("users").doc(cred.user.uid).set({
+        name, email, phone,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      break;
+    } catch (e) {
+      console.warn(`Couldn't create Firestore profile doc during sign-up (attempt ${attempt}):`, e);
+      if (attempt === 2) {
+        // Don't block sign-up on this — the account still works, and
+        // loadProfile()'s self-heal (js/account.js) fills this in next
+        // time they open My Account.
+      } else {
+        await new Promise((r) => setTimeout(r, 800));
+      }
+    }
   }
 
   return cred.user;
