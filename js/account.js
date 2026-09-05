@@ -28,9 +28,19 @@ async function loadProfile(uid) {
   const profile = await getUserProfile(uid);
   const fallbackName = currentUser.displayName || "";
   const fallbackEmail = currentUser.email || "";
-  document.getElementById("p-name").value = (profile && profile.name) || fallbackName;
+  const nameVal = (profile && profile.name) || fallbackName;
+  const phoneVal = (profile && profile.phone) || "";
+  document.getElementById("p-name").value = nameVal;
   document.getElementById("p-email").value = (profile && profile.email) || fallbackEmail;
-  document.getElementById("p-phone").value = (profile && profile.phone) || "";
+  document.getElementById("p-phone").value = phoneVal;
+
+  // Nudge anyone whose sign-up save didn't fully land (missing name and/or
+  // phone) to confirm their details themselves, rather than leaving two
+  // blank fields with no explanation.
+  const incompleteNotice = document.getElementById("profile-incomplete-notice");
+  if (incompleteNotice) {
+    incompleteNotice.classList.toggle("booking-hidden", !(!nameVal || !phoneVal));
+  }
 
   // Self-heal: if sign-up's Firestore write never landed (no doc, or a doc
   // missing name entirely), quietly write what we already know from Firebase

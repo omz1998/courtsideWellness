@@ -31,42 +31,43 @@ function requireAuthReady() {
   }
 }
 
+// Cloud Function that creates the users/{uid} profile doc via the Admin SDK
+// (see functions/index.js). Paste in the real URL after deploying — it's
+// printed in the `firebase deploy --only functions` output, or found in
+// Firebase Console > Functions > createProfile > click it > copy the trigger URL.
+const CREATE_PROFILE_URL = "https://createprofile-f6amuqmcqa-ts.a.run.app";
+
 async function signUp(name, email, phone, password) {
   requireAuthReady();
   const cred = await auth.createUserWithEmailAndPassword(email, password);
 
-  // Set displayName on the Auth user first — this always succeeds once the
-  // account exists, so name/email are available even if the Firestore write
-  // below fails (e.g. rules not published yet). Previously this ran after
-  // the Firestore write, so a rules hiccup left the account with no name
-  // anywhere and no users/{uid} doc, even though sign-up looked like it worked.
+  // Set displayName on the Auth user — this always succeeds once the account
+  // exists, so a name is available on the account even if the call below
+  // somehow fails too.
   await cred.user.updateProfile({ displayName: name });
 
-  // Force a fresh ID token before writing to Firestore. Right after account
-  // creation, the token the SDK is still holding can occasionally be the
-  // pre-signup one for a brief moment, which the users/{userId} security
-  // rule then sees as request.auth.uid not matching yet, silently failing
-  // the write below. Forcing a refresh here closes that timing gap.
-  await cred.user.getIdToken(true);
-
-  // Retries once on failure (covers any other brief timing hiccup) before
-  // giving up and falling back to the account-page self-heal below.
-  for (let attempt = 1; attempt <= 2; attempt++) {
+  // Profile creation runs through a Cloud Function (Admin SDK) rather than a
+  // direct client Firestore write. A direct write here was unreliably
+  // failing right after account creation — a timing gap between a brand new
+  // Firebase Auth account and Firestore's security rules recognising it —
+  // even with retries and a forced token refresh. The Admin SDK has no such
+  // gap, since it doesn't go through security rules or the client's token.
+  if (CREATE_PROFILE_URL.startsWith("PASTE_")) {
+    console.warn("CREATE_PROFILE_URL isn't set yet in js/auth.js — profile won't be saved. See README.");
+  } else {
     try {
-      await authDb.collection("users").doc(cred.user.uid).set({
-        name, email, phone,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      const idToken = await cred.user.getIdToken();
+      const res = await fetch(CREATE_PROFILE_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + idToken },
+        body: JSON.stringify({ name, phone })
       });
-      break;
+      if (!res.ok) throw new Error("Server responded " + res.status);
     } catch (e) {
-      console.warn(`Couldn't create Firestore profile doc during sign-up (attempt ${attempt}):`, e);
-      if (attempt === 2) {
-        // Don't block sign-up on this — the account still works, and
-        // loadProfile()'s self-heal (js/account.js) fills this in next
-        // time they open My Account.
-      } else {
-        await new Promise((r) => setTimeout(r, 800));
-      }
+      // Don't block sign-up on this — the account still works, and
+      // loadProfile()'s self-heal (js/account.js) fills in what it can next
+      // time they open My Account.
+      console.warn("Couldn't create profile doc during sign-up:", e);
     }
   }
 

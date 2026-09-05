@@ -149,6 +149,17 @@ Every footer currently links to `https://instagram.com/courtsidewellness` as a p
 
 Without step 5 published, bookings/login/admin will show a "Firebase isn't configured" or permission error.
 
+## 3b. Set up the profile-creation function (needed for sign-up to save name/phone)
+
+New sign-ups create their `users/{uid}` profile doc through a Cloud Function (`createProfile` in `functions/index.js`) rather than a direct write from the browser — a direct write right at sign-up time turned out to be unreliable due to a brief timing gap between a brand-new Firebase Auth account and Firestore's security rules recognising it. The function uses the Admin SDK, which has no such gap.
+
+1. Deploy it: `firebase deploy --only functions` (same command used for the Stripe webhook — this deploys everything in `functions/index.js`, including this one).
+2. Copy its URL from the deploy output, or from **Firebase Console → Functions → createProfile → click it → copy the trigger URL**.
+3. Open `js/auth.js` and replace `PASTE_CREATE_PROFILE_FUNCTION_URL` with that URL.
+4. Push the site (`git add . && git commit -m "..." && git push`).
+
+Until this is set, sign-ups still work (the account is created fine), but name/phone won't save until that member opens My Account and hits Save once themselves.
+
 ## 4. Set up Stripe (two payment links — one per class price)
 
 1. Free account at https://dashboard.stripe.com/register.

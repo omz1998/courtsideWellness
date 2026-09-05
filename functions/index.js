@@ -30,6 +30,61 @@ const stripeWebhookSecret = defineSecret("STRIPE_WEBHOOK_SECRET");
 // Get one at https://web3forms.com if you haven't already (see README).
 const WEB3FORMS_ACCESS_KEY = "d24bdd7e-adbe-479c-b7c0-d7ff45af0bc3";
 
+// Creates the users/{uid} profile doc (name/email/phone) right at sign-up,
+// using the Admin SDK — which bypasses Firestore security rules entirely.
+// This replaces a client-side write that was unreliably failing right after
+// account creation (a timing gap between a brand new Firebase Auth account
+// and Firestore's security rules recognising it), even after retries and a
+// forced token refresh client-side. The Admin SDK has no such gap, since it
+// doesn't go through security rules or the client's ID token at all.
+exports.createProfile = onRequest({ region: "australia-southeast1" }, async (req, res) => {
+  res.set("Access-Control-Allow-Origin", "*");
+  res.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  if (req.method === "OPTIONS") {
+    res.status(204).send("");
+    return;
+  }
+  if (req.method !== "POST") {
+    res.status(405).send("Method not allowed");
+    return;
+  }
+
+  try {
+    const authHeader = req.headers.authorization || "";
+    const idToken = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
+    if (!idToken) {
+      res.status(401).send("Missing auth token");
+      return;
+    }
+    // Verifying the token (rather than trusting a uid sent in the body)
+    // proves this request really came from the account it claims to.
+    const decoded = await admin.auth().verifyIdToken(idToken);
+    const uid = decoded.uid;
+
+    const { name, phone } = req.body || {};
+    if (!name || !phone) {
+      res.status(400).send("Missing name or phone");
+      return;
+    }
+
+    const userRef = db.collection("users").doc(uid);
+    const existing = await userRef.get();
+    const needsCreatedAt = !existing.exists || !existing.data().createdAt;
+
+    await userRef.set({
+      name,
+      phone,
+      email: decoded.email || "",
+      ...(needsCreatedAt ? { createdAt: admin.firestore.FieldValue.serverTimestamp() } : {})
+    }, { merge: true });
+
+    res.status(200).send("ok");
+  } catch (err) {
+    logger.error("createProfile failed:", err);
+    res.status(500).send("Server error");
+  }
+});
+
 // Emails admin@courtsidewellness.com.au for new memberships and package
 // purchases. Failures here are only logged, never thrown — a notification
 // email going missing shouldn't stop the actual booking/package/membership
@@ -93,7 +148,7 @@ exports.stripeWebhook = onRequest(
           const buyerEmail = session.customer_details?.email || "-";
 
           if (session.mode === "subscription") {
-            await activateMembership(session.client_reference_id, session.subscription, session.customer);
+            await activateMembership(session.client_reference_id, session.subscription, session.customer, buyerName, buyerEmail);
             await notifyAdmin(
               "New member joined Courtside Wellness",
               `A new membership just started.\n\nName: ${buyerName}\nEmail: ${buyerEmail}`
@@ -182,14 +237,27 @@ async function confirmFromReference(ref) {
 const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
 // First successful payment on a brand new membership subscription (checkout
-// mode: "subscription").
-async function activateMembership(ref, subscriptionId, customerId) {
+// mode: "subscription"). buyerName/buyerEmail come from Stripe's own checkout
+// details, used as a fallback below so admin can still see who this is even
+// if the original client-side sign-up write to users/{uid} never landed
+// (e.g. a rules hiccup, or the account was created outside signup.html).
+async function activateMembership(ref, subscriptionId, customerId, buyerName, buyerEmail) {
   if (!ref || !ref.startsWith("member_")) {
     logger.warn(`Membership checkout had no/unrecognised client_reference_id: "${ref}"`);
     return;
   }
   const uid = ref.slice("member_".length);
-  await db.collection("users").doc(uid).set({
+
+  const userRef = db.collection("users").doc(uid);
+  const existing = await userRef.get();
+  const existingData = existing.exists ? existing.data() : {};
+  const fallback = {};
+  if (!existingData.name && buyerName && buyerName !== "-") fallback.name = buyerName;
+  if (!existingData.email && buyerEmail && buyerEmail !== "-") fallback.email = buyerEmail;
+  if (!existingData.createdAt) fallback.createdAt = admin.firestore.FieldValue.serverTimestamp();
+
+  await userRef.set({
+    ...fallback,
     membership: {
       status: "active",
       stripeSubscriptionId: subscriptionId,
