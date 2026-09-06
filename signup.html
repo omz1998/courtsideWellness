@@ -107,8 +107,16 @@
     return params.get("redirect") || "account.html";
   }
 
+  // Guards against the auth-state listener below firing mid-signup: the
+  // instant signUp() creates the Firebase account (its first step), this
+  // page becomes "logged in" and onAuthReady's callback fires too — even
+  // though signUp() isn't done yet. Without this flag that redirects the
+  // page away immediately, aborting the profile-save request still in
+  // flight, which is why name/phone were never reaching the server.
+  let signingUp = false;
+
   onAuthReady((user) => {
-    if (user) location.href = redirectTarget();
+    if (user && !signingUp) location.href = redirectTarget();
   });
 
   document.getElementById("signup-form").addEventListener("submit", async (e) => {
@@ -129,10 +137,12 @@
 
     btn.disabled = true;
     btn.textContent = "Creating account…";
+    signingUp = true;
     try {
       await signUp(name, email, phone, password);
       location.href = redirectTarget();
     } catch (err) {
+      signingUp = false;
       errorEl.textContent = err.message.replace("Firebase: ", "");
       errorEl.classList.remove("booking-hidden");
       btn.disabled = false;
