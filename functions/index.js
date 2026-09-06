@@ -16,6 +16,7 @@ const { defineSecret } = require("firebase-functions/params");
 const { logger } = require("firebase-functions");
 const admin = require("firebase-admin");
 const Stripe = require("stripe");
+const nodemailer = require("nodemailer");
 
 admin.initializeApp();
 const db = admin.firestore();
@@ -24,11 +25,18 @@ const db = admin.firestore();
 // (see README.md for the full setup steps)
 const stripeWebhookSecret = defineSecret("STRIPE_WEBHOOK_SECRET");
 
-// Same free Web3Forms access key already used by js/message.js for the
-// "Message Us" popup — Web3Forms keys aren't sensitive (they're designed to
-// be embedded in public HTML forms), so this can just be pasted in directly.
-// Get one at https://web3forms.com if you haven't already (see README).
-const WEB3FORMS_ACCESS_KEY = "d24bdd7e-adbe-479c-b7c0-d7ff45af0bc3";
+// The mailbox password for admin@courtsidewellness.com.au (hosted on
+// Hostinger), used to send admin notification emails via its SMTP server.
+// Set with:
+//   firebase functions:secrets:set EMAIL_PASSWORD
+// See README.md for the SMTP host/port and where to find them in hPanel.
+//
+// This replaces Web3Forms for server-side email: Web3Forms sits behind
+// Cloudflare bot protection that blocks requests coming from Google Cloud's
+// servers with an html challenge page instead of sending the email — it
+// still works fine from js/message.js because that call comes from a real
+// browser. The mailbox's own SMTP server has no such restriction.
+const emailPassword = defineSecret("EMAIL_PASSWORD");
 
 // Creates the users/{uid} profile doc (name/email/phone) right at sign-up,
 // using the Admin SDK — which bypasses Firestore security rules entirely.
@@ -37,7 +45,7 @@ const WEB3FORMS_ACCESS_KEY = "d24bdd7e-adbe-479c-b7c0-d7ff45af0bc3";
 // and Firestore's security rules recognising it), even after retries and a
 // forced token refresh client-side. The Admin SDK has no such gap, since it
 // doesn't go through security rules or the client's ID token at all.
-exports.createProfile = onRequest({ region: "australia-southeast1" }, async (req, res) => {
+exports.createProfile = onRequest({ region: "australia-southeast1", secrets: [emailPassword] }, async (req, res) => {
   res.set("Access-Control-Allow-Origin", "*");
   res.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
   if (req.method === "OPTIONS") {
@@ -95,38 +103,40 @@ exports.createProfile = onRequest({ region: "australia-southeast1" }, async (req
   }
 });
 
-// Emails admin@courtsidewellness.com.au for new memberships and package
-// purchases. Failures here are only logged, never thrown — a notification
-// email going missing shouldn't stop the actual booking/package/membership
-// from being confirmed.
+// Emails admin@courtsidewellness.com.au for new sign-ups, new memberships,
+// and package purchases, via Gmail SMTP (see gmailAppPassword above for why
+// not Web3Forms). Failures here are only logged, never thrown — a
+// notification email going missing shouldn't stop the actual signup/
+// booking/package/membership from being confirmed.
 async function notifyAdmin(subject, message) {
-  if (WEB3FORMS_ACCESS_KEY === "PASTE_WEB3FORMS_ACCESS_KEY") {
-    logger.warn("Skipping admin notification email — WEB3FORMS_ACCESS_KEY not set in functions/index.js yet.");
+  const password = emailPassword.value();
+  if (!password) {
+    logger.warn("Skipping admin notification email — EMAIL_PASSWORD secret isn't set yet. See README.");
     return;
   }
   try {
-    const res = await fetch("https://api.web3forms.com/submit", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify({
-        access_key: WEB3FORMS_ACCESS_KEY,
-        subject,
-        from_name: "Courtside Wellness Website",
-        email: "admin@courtsidewellness.com.au",
-        message
-      })
+    // Hostinger's mail SMTP settings — confirm these against hPanel > Emails
+    // > Configure Email Client for this exact mailbox and adjust here if
+    // different (e.g. some accounts use smtp.titan.email instead).
+    const transporter = nodemailer.createTransport({
+      host: "smtp.hostinger.com",
+      port: 465,
+      secure: true,
+      auth: { user: "admin@courtsidewellness.com.au", pass: password }
     });
-    const data = await res.json();
-    if (!data.success) {
-      logger.error("Web3Forms admin notification failed:", data.message || data);
-    }
+    await transporter.sendMail({
+      from: '"Courtside Wellness Website" <admin@courtsidewellness.com.au>',
+      to: "admin@courtsidewellness.com.au",
+      subject,
+      text: message
+    });
   } catch (err) {
     logger.error("Error sending admin notification email:", err);
   }
 }
 
 exports.stripeWebhook = onRequest(
-  { secrets: [stripeWebhookSecret], region: "australia-southeast1" },
+  { secrets: [stripeWebhookSecret, emailPassword], region: "australia-southeast1" },
   async (req, res) => {
     // No real Stripe API key is needed here — constructEvent only checks the
     // request signature against the webhook secret, it never calls Stripe's API.
