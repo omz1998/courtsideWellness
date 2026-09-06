@@ -78,6 +78,16 @@ exports.createProfile = onRequest({ region: "australia-southeast1" }, async (req
       ...(needsCreatedAt ? { createdAt: admin.firestore.FieldValue.serverTimestamp() } : {})
     }, { merge: true });
 
+    // Only email the first time this account's profile doc is created, in
+    // case this endpoint is ever hit again for the same uid — so re-tests
+    // or retries don't send duplicate "new signup" emails.
+    if (needsCreatedAt) {
+      await notifyAdmin(
+        "New signup on Courtside Wellness",
+        `Someone just created an account.\n\nName: ${name}\nEmail: ${decoded.email || "-"}\nPhone: ${phone}`
+      );
+    }
+
     res.status(200).send("ok");
   } catch (err) {
     logger.error("createProfile failed:", err);

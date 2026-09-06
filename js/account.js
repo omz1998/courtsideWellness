@@ -34,14 +34,6 @@ async function loadProfile(uid) {
   document.getElementById("p-email").value = (profile && profile.email) || fallbackEmail;
   document.getElementById("p-phone").value = phoneVal;
 
-  // Nudge anyone whose sign-up save didn't fully land (missing name and/or
-  // phone) to confirm their details themselves, rather than leaving two
-  // blank fields with no explanation.
-  const incompleteNotice = document.getElementById("profile-incomplete-notice");
-  if (incompleteNotice) {
-    incompleteNotice.classList.toggle("booking-hidden", !(!nameVal || !phoneVal));
-  }
-
   // Self-heal: if sign-up's Firestore write never landed (no doc, or a doc
   // missing name entirely), quietly write what we already know from Firebase
   // Auth right now — so admin sees this member without them needing to
