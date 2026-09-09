@@ -299,12 +299,15 @@ The Contact page has a "Message Us" button that opens a popup form (name, email,
 
 Until that's done, the popup shows a message explaining it isn't set up yet rather than failing silently. There's also a hidden honeypot field for basic spam protection.
 
-### Also used for new member / package purchase emails
+### Admin notification emails (new sign-up / new member / package purchase)
 
-The same Web3Forms key powers admin email notifications from the Stripe webhook: `admin@courtsidewellness.com.au` gets an email whenever someone joins as a member or buys a class package (bookings stay silent, on purpose, to avoid a flood of emails).
+`admin@courtsidewellness.com.au` also gets an email whenever someone creates an account, joins as a member, or buys a class package (bookings stay silent, on purpose, to avoid a flood of emails). This is separate from the "Message Us" popup above and does **not** use Web3Forms — Web3Forms sits behind bot protection that blocks requests coming from a server instead of a real browser, so these are sent directly through the mailbox's own SMTP server (hosted on Hostinger) instead:
 
-1. Open `functions/index.js` and replace the second `PASTE_WEB3FORMS_ACCESS_KEY` (near the top, in `notifyAdmin`) with the same key from `js/message.js`.
-2. Redeploy: `firebase deploy --only functions`.
+1. In hPanel, go to Emails → click on the courtsidewellness.com.au mailbox → find "Configure Email Client" (or "Connect Apps & Devices"). Note the outgoing/SMTP server and port shown there — `functions/index.js` currently assumes `smtp.hostinger.com` on port 465 (SSL); update the `nodemailer.createTransport(...)` call in `notifyAdmin()` if yours differs (e.g. `smtp.titan.email`).
+2. Set the mailbox's password as a Firebase secret (you'll be prompted to paste it in): `firebase functions:secrets:set EMAIL_PASSWORD`
+3. Redeploy: `firebase deploy --only functions`
+
+If this secret isn't set yet, these emails are silently skipped (logged as a warning in Functions logs) rather than breaking sign-up/checkout.
 
 Until that's set, these are just skipped (logged in Functions logs), the booking/package/membership confirmation itself still works either way.
 

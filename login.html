@@ -57,6 +57,8 @@
       <p style="margin-top: 20px; font-size: 0.9rem;">
         <a href="#" id="forgot-link" style="text-decoration: underline;">Forgot password?</a>
       </p>
+      <p id="reset-error" class="form-error booking-hidden"></p>
+      <p id="reset-success" class="booking-hidden" style="color: #1A7F4B; font-weight: 600; font-size: 0.9rem; margin-top: 4px;"></p>
       <p style="margin-top: 8px; font-size: 0.9rem;">
         No account yet? <a href="signup.html" style="text-decoration: underline; color: var(--pink-dark); font-weight: 600;">Sign up</a>
       </p>
@@ -129,12 +131,23 @@
   document.getElementById("forgot-link").addEventListener("click", async (e) => {
     e.preventDefault();
     const email = document.getElementById("l-email").value.trim();
-    if (!email) { alert("Enter your email above first, then click Forgot password."); return; }
+    const errorEl = document.getElementById("reset-error");
+    const successEl = document.getElementById("reset-success");
+    errorEl.classList.add("booking-hidden");
+    successEl.classList.add("booking-hidden");
+
+    if (!email) {
+      errorEl.textContent = "Enter your email above first, then click Forgot password.";
+      errorEl.classList.remove("booking-hidden");
+      return;
+    }
     try {
       await resetPassword(email);
-      alert("Password reset email sent to " + email);
+      successEl.textContent = "Password reset email sent to " + email + ".";
+      successEl.classList.remove("booking-hidden");
     } catch (err) {
-      alert(err.message.replace("Firebase: ", ""));
+      errorEl.textContent = err.message.replace("Firebase: ", "");
+      errorEl.classList.remove("booking-hidden");
     }
   });
 </script>

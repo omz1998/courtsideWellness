@@ -442,6 +442,51 @@ h2 {
   color: var(--ink-soft);
 }
 
+/* Higher-visibility callout than .notice — used for time-sensitive offers
+   (e.g. the Open Day membership promo) where a plain pink-soft box would
+   blend in too much with the rest of the page. */
+.promo-banner {
+  background: var(--gradient-pink);
+  color: var(--white);
+  border-radius: var(--radius);
+  padding: 18px 24px;
+  text-align: center;
+  font-size: 0.95rem;
+  box-shadow: var(--shadow);
+}
+
+.promo-banner strong { font-weight: 700; }
+
+.promo-banner a {
+  color: var(--white);
+  text-decoration: underline;
+  font-weight: 600;
+}
+
+/* Compact single-line email capture (e.g. coming-soon.html's "Notify Me"),
+   distinct from .form-grid which stacks labelled fields vertically. */
+.notify-form {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.notify-form input {
+  flex: 1;
+  min-width: 200px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1.5px solid var(--cream-dark);
+  font-size: 0.95rem;
+  font-family: inherit;
+}
+
+.notify-form input:focus {
+  outline: none;
+  border-color: var(--pink);
+}
+
 /* ---------- Hours table ---------- */
 
 .hours-table {

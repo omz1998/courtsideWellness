@@ -66,6 +66,17 @@
     <div class="notice" style="margin-top: 16px;">
       Want to be first to know what's next? <a href="contact.html" style="text-decoration: underline;">Get in touch</a>, or follow along on <a href="https://instagram.com/courtsidewellness" target="_blank" rel="noopener" style="text-decoration: underline;">Instagram</a>.
     </div>
+
+    <div class="info-block" style="margin-top: 24px;">
+      <h3>Get Notified</h3>
+      <p style="font-size: 0.9rem; color: var(--ink-soft);">Leave your email and we'll let you know as soon as Open Day and new classes are confirmed.</p>
+      <form id="notify-form" class="notify-form">
+        <input type="email" id="notify-email" placeholder="you@email.com" required>
+        <button type="submit" id="notify-submit" class="btn btn-primary">Notify Me</button>
+      </form>
+      <p id="notify-error" class="form-error booking-hidden" style="margin-top: 10px;"></p>
+      <p id="notify-success" class="booking-hidden" style="color: #1A7F4B; font-weight: 600; font-size: 0.9rem; margin: 10px 0 0;">Thanks, we'll be in touch.</p>
+    </div>
   </div>
 </section>
 
@@ -100,6 +111,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="js/firebase-config.js"></script>
 <script src="js/auth.js"></script>
+<script src="js/notify.js"></script>
 <script src="js/script.js"></script>
 </body>
 </html>

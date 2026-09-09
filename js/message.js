@@ -113,4 +113,15 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.getElementById("message-form").addEventListener("submit", submitMessage);
+
+  // Links like classes.html/booking.html's "Register Interest" (Kids
+  // Fitness) send people here with ?topic=kids-fitness so the message
+  // arrives with context already filled in, instead of a blank box that
+  // leaves admin guessing what someone's actually asking about.
+  const topic = new URLSearchParams(location.search).get("topic");
+  if (topic === "kids-fitness") {
+    const messageInput = document.getElementById("m-message");
+    if (messageInput) messageInput.value = "I'm interested in Kids Fitness classes, please let me know when dates are confirmed.";
+    openMessageModal();
+  }
 });
