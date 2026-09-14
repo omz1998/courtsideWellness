@@ -99,7 +99,7 @@ function sessionKey(classType, date, time) {
 // Classes don't start until launch day — no bookable date will ever be
 // offered before this, even once "tomorrow" catches up to it. Once launch
 // day has passed, this has no effect and dates just start from tomorrow.
-const FIRST_BOOKABLE_DATE = "2026-10-05";
+const FIRST_BOOKABLE_DATE = "2026-10-12";
 
 function nextWeekdays(count) {
   const dates = [];
@@ -449,7 +449,7 @@ document.addEventListener("DOMContentLoaded", () => {
       card.innerHTML = `
         <div class="notice" style="text-align: center; padding: 40px 20px;">
           <h3 style="margin-bottom: 10px;">Bookings open soon</h3>
-          <p>We're putting the finishing touches on our timetable. Bookings open shortly before launch on Monday 5 October 2026. <a href="contact.html" style="text-decoration: underline;">Get in touch</a> to be notified, or check back soon.</p>
+          <p>We're putting the finishing touches on our timetable. Bookings open shortly before launch on Monday 12 October 2026. <a href="contact.html" style="text-decoration: underline;">Get in touch</a> to be notified, or check back soon.</p>
         </div>
       `;
     }

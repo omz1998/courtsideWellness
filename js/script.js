@@ -1,7 +1,7 @@
 // Courtside Wellness — shared interactivity
 
 // Bookings toggle — flip to true once bookings should go live (e.g. closer
-// to 5 October 2026). While false, every "Book a Class" link/button
+// to 12 October 2026). While false, every "Book a Class" link/button
 // site-wide (nav button, Classes page buttons, Contact page button) is
 // automatically relabelled to "Bookings Open Soon" and disabled, and
 // booking.html itself shows a holding message instead of the booking form.
