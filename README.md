@@ -145,7 +145,7 @@ Every footer currently links to `https://instagram.com/courtsidewellness` as a p
 
    Note the trade-off: `sessions` writes are open to anyone (including guests) so spot counts can update without login — reasonable for a small studio, but someone technical could inflate counts if they wanted to. If that becomes a real concern, the fix is a Cloud Function to own the increment logic server-side.
 
-6. **Grant yourself admin access**: sign up for a member account on the live site once, copy your UID from **Authentication → Users**, then in **Firestore → Data**, create a collection called `admins` with a document whose ID is your UID (any field inside, e.g. `role: "owner"`). Log out and back in — an "Admin" link appears in the nav.
+6. **Grant yourself admin access**: sign up for a member account on the live site once, copy your UID from **Authentication → Users**, then in **Firestore → Data**, create a collection called `admins` with a document whose ID is your UID (any field inside, e.g. `role: "owner"`). Also open your own document in the `users` collection (same UID) and add a field `isAdminAccount` set to `true` — this is what keeps admin/staff accounts out of the Members list in admin.html (Firestore rules only let each admin read their own `admins/{uid}` doc, not list the whole collection, so the Members tab can't check that directly — this flag on your own profile is the workaround). Log out and back in — an "Admin" link appears in the nav.
 
 Without step 5 published, bookings/login/admin will show a "Firebase isn't configured" or permission error.
 

@@ -227,7 +227,15 @@ let allMembers = [];
 async function loadMembers() {
   const snap = await authDb.collection("users").get();
   const members = [];
-  snap.forEach((doc) => members.push({ id: doc.id, ...doc.data() }));
+  // Skip admin accounts — they're staff, not customers, and don't belong in
+  // this list. Checked via a flag on their own users/{uid} doc rather than
+  // querying the "admins" collection directly, since Firestore rules only
+  // let each admin read their own admin record, not list the whole
+  // collection (see README's "Grant yourself admin access" step).
+  snap.forEach((doc) => {
+    const data = doc.data();
+    if (!data.isAdminAccount) members.push({ id: doc.id, ...data });
+  });
   members.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
   allMembers = members;
   filterMembers();
