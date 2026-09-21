@@ -32,6 +32,12 @@ const DEMO_MEMBERS = [
   { id: "mia", name: "Mia Robertson", email: "mia.robertson@example.com", phone: "0478 901 234", createdAt: demoTimestamp(-2) },
 ];
 
+const DEMO_RSVPS = [
+  { id: "rsvpdemo1", name: "Sarah Chen", phone: "0412 345 678", attending: true, headcount: 2, createdAt: demoTimestamp(-3) },
+  { id: "rsvpdemo2", name: "Priya Nair", phone: "0423 456 789", attending: true, headcount: 1, createdAt: demoTimestamp(-2) },
+  { id: "rsvpdemo3", name: "Jess Taylor", phone: "0434 567 890", attending: false, headcount: 0, createdAt: demoTimestamp(-1) },
+];
+
 function nextWeekday(offsetDays) {
   const d = new Date();
   d.setDate(d.getDate() + offsetDays);
@@ -307,6 +313,50 @@ async function loadPackages() {
   renderPackagesTable(packages, true);
 }
 
+function fmtRsvpDate(ts) {
+  if (!ts || !ts.toDate) return "-";
+  return ts.toDate().toLocaleDateString("en-AU", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
+}
+
+function renderRSVPsTable(rsvps) {
+  const tbody = document.getElementById("rsvps-tbody");
+  if (!tbody) return;
+
+  if (rsvps.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5">No RSVPs yet.</td></tr>`;
+  } else {
+    tbody.innerHTML = rsvps.map((r) => `
+      <tr>
+        <td>${r.name || "-"}</td>
+        <td><a href="tel:${r.phone}">${r.phone || "-"}</a></td>
+        <td>${r.attending ? "Yes" : "Can't make it"}</td>
+        <td>${r.attending ? (r.headcount ?? 1) : "-"}</td>
+        <td>${fmtRsvpDate(r.createdAt)}</td>
+      </tr>
+    `).join("");
+  }
+
+  const yesRsvps = rsvps.filter((r) => r.attending);
+  const totalHeadcount = yesRsvps.reduce((sum, r) => sum + (r.headcount || 1), 0);
+  document.getElementById("stat-rsvp-yes").textContent = yesRsvps.length;
+  document.getElementById("stat-rsvp-headcount").textContent = totalHeadcount;
+  document.getElementById("stat-rsvp-no").textContent = rsvps.length - yesRsvps.length;
+}
+
+async function loadRSVPs() {
+  const tbody = document.getElementById("rsvps-tbody");
+  if (!tbody) return; // no RSVPs tab on this page
+  try {
+    const snap = await authDb.collection("rsvps").get();
+    const rsvps = [];
+    snap.forEach((doc) => rsvps.push({ id: doc.id, ...doc.data() }));
+    rsvps.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+    renderRSVPsTable(rsvps);
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="5">Couldn't load RSVPs: ${err.message.replace("Firebase: ", "")}</td></tr>`;
+  }
+}
+
 async function handlePackageAction(action, packageId) {
   try {
     if (action === "confirm") {
@@ -357,6 +407,7 @@ function loadDemo() {
   renderPackagesTable(DEMO_PACKAGES, false);
   allMembers = DEMO_MEMBERS;
   renderMembersTable(DEMO_MEMBERS, false);
+  renderRSVPsTable(DEMO_RSVPS);
 }
 
 function initAdminTabs() {
@@ -404,5 +455,6 @@ document.addEventListener("DOMContentLoaded", () => {
     loadBookings();
     loadPackages();
     loadMembers();
+    loadRSVPs();
   });
 });

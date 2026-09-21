@@ -137,6 +137,16 @@ Every footer currently links to `https://instagram.com/courtsidewellness` as a p
 
          allow delete: if false;
        }
+
+       match /rsvps/{rsvpId} {
+         // Anyone can RSVP without an account (open-day.html) — only admin
+         // can read the list back, so headcounts aren't publicly visible.
+         allow create: if request.resource.data.name is string
+                       && request.resource.data.phone is string
+                       && request.resource.data.attending is bool;
+         allow read: if isAdmin();
+         allow update, delete: if false;
+       }
      }
    }
    ```

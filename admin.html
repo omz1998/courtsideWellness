@@ -44,6 +44,7 @@
     <div class="admin-tabs">
       <button type="button" class="admin-tab active" data-tab="bookings">Bookings</button>
       <button type="button" class="admin-tab" data-tab="members">Members</button>
+      <button type="button" class="admin-tab" data-tab="rsvps">Open Day RSVPs</button>
     </div>
 
     <div id="tab-bookings" class="admin-tab-panel">
@@ -138,6 +139,40 @@
           </thead>
           <tbody id="members-tbody">
             <tr><td colspan="7">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="tab-rsvps" class="admin-tab-panel booking-hidden">
+      <span class="section-label">Open Day RSVPs</span>
+      <div class="admin-stats">
+        <div class="stat-card">
+          <div class="stat-number" id="stat-rsvp-yes">-</div>
+          <div class="stat-label">RSVPs (yes)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="stat-rsvp-headcount">-</div>
+          <div class="stat-label">Total headcount</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="stat-rsvp-no">-</div>
+          <div class="stat-label">Can't make it</div>
+        </div>
+      </div>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Phone</th>
+              <th>Attending</th>
+              <th>Headcount</th>
+              <th>Submitted</th>
+            </tr>
+          </thead>
+          <tbody id="rsvps-tbody">
+            <tr><td colspan="5">Loading…</td></tr>
           </tbody>
         </table>
       </div>
