@@ -113,7 +113,16 @@
 
     <div id="tab-members" class="admin-tab-panel booking-hidden">
       <span class="section-label">Members</span>
-      <input type="text" id="members-search" class="admin-search" placeholder="Search members by name or email...">
+      <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+        <input type="text" id="members-search" class="admin-search" placeholder="Search members by name or email..." style="flex: 1; min-width: 220px;">
+        <select id="members-filter" class="admin-search" style="width: auto; flex: none;">
+          <option value="all">All members</option>
+          <option value="active">Active members</option>
+          <option value="past_due">Past due</option>
+          <option value="cancelled">Cancelled membership</option>
+          <option value="none">Not a member</option>
+        </select>
+      </div>
       <div class="admin-table-wrap">
         <table class="admin-table">
           <thead>

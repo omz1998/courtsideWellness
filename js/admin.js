@@ -236,9 +236,21 @@ async function loadMembers() {
 function filterMembers() {
   const input = document.getElementById("members-search");
   const q = input ? input.value.trim().toLowerCase() : "";
-  const filtered = !q ? allMembers : allMembers.filter((m) =>
+  const filterSelect = document.getElementById("members-filter");
+  const status = filterSelect ? filterSelect.value : "all";
+
+  let filtered = !q ? allMembers : allMembers.filter((m) =>
     (m.name || "").toLowerCase().includes(q) || (m.email || "").toLowerCase().includes(q)
   );
+
+  if (status !== "all") {
+    filtered = filtered.filter((m) => {
+      const membershipStatus = m.membership && m.membership.status;
+      if (status === "none") return !membershipStatus;
+      return membershipStatus === status;
+    });
+  }
+
   renderMembersTable(filtered, !DEMO_MODE);
 }
 
@@ -355,6 +367,9 @@ function initAdminTabs() {
 
   const membersSearch = document.getElementById("members-search");
   if (membersSearch) membersSearch.addEventListener("input", filterMembers);
+
+  const membersFilter = document.getElementById("members-filter");
+  if (membersFilter) membersFilter.addEventListener("change", filterMembers);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
