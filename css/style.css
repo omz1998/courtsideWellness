@@ -452,6 +452,26 @@ h2 {
   color: var(--ink-soft);
 }
 
+/* Slim strip pinned above the header, on every page, so a time-sensitive
+   notice (e.g. Open Day) is visible the instant the page loads, no
+   scrolling past the hero required. */
+.announce-bar {
+  background: var(--gradient-pink);
+  text-align: center;
+  padding: 10px 16px;
+}
+
+.announce-bar a {
+  color: var(--white);
+  font-weight: 600;
+  font-size: 0.85rem;
+  display: inline-block;
+}
+
+.announce-bar a:hover { text-decoration: underline; }
+
+.announce-bar .arrow { font-weight: 700; }
+
 /* Higher-visibility callout than .notice — used for time-sensitive offers
    (e.g. the Open Day membership promo) where a plain pink-soft box would
    blend in too much with the rest of the page. */

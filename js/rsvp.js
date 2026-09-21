@@ -18,6 +18,21 @@ document.addEventListener("DOMContentLoaded", () => {
   attendingSelect.addEventListener("change", syncHeadcountVisibility);
   syncHeadcountVisibility();
 
+  // If they're logged in, prefill from their account so they don't have to
+  // retype it, still just a plain guest write to "rsvps" either way.
+  onAuthReady(async (user) => {
+    if (!user) return;
+    try {
+      const profile = await getUserProfile(user.uid);
+      if (profile) {
+        document.getElementById("r-name").value = profile.name || "";
+        document.getElementById("r-phone").value = profile.phone || "";
+      }
+    } catch (e) {
+      // Not logged in / lookup failed — leave the fields blank, no big deal.
+    }
+  });
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
