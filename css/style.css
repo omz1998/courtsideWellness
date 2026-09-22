@@ -992,6 +992,19 @@ h2 {
   .stats { grid-template-columns: 1fr; }
 }
 
+/* On phones, the brand wordmark (icon + full "Courtside Wellness" text at
+   1.3rem, non-shrinking/nowrap by design further up) gets wide enough that
+   it leaves the .nav-toggle hamburger button without room next to it — the
+   flex row doesn't wrap, so the toggle gets pushed past the right edge of
+   the viewport and becomes invisible/unreachable instead of just crowding
+   things. Below 480px, shrink the nav's own padding/gap and the wordmark
+   itself so the icon + toggle reliably both fit down to a 320px-wide phone. */
+@media (max-width: 480px) {
+  .nav { padding: 14px 16px; gap: 10px; }
+  .brand { font-size: 1.05rem; gap: 8px; }
+  .brand img { height: 36px; }
+}
+
 /* ---------- Admin dashboard ---------- */
 
 .admin-stats {
