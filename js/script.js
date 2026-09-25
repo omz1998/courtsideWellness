@@ -1,12 +1,13 @@
 // Courtside Wellness — shared interactivity
 
-// Bookings toggle — flip to true once bookings should go live (e.g. closer
-// to 12 October 2026). While false, every "Book a Class" link/button
+// Bookings toggle — while false, every "Book a Class" link/button
 // site-wide (nav button, Classes page buttons, Contact page button) is
 // automatically relabelled to "Bookings Open Soon" and disabled, and
 // booking.html itself shows a holding message instead of the booking form.
 // No other file needs to change when you flip this back to true.
-const BOOKINGS_OPEN = false;
+// Live from 13 October 2026 (the day after Open Day) — see
+// FIRST_BOOKABLE_DATE in js/booking.js for the actual earliest class date.
+const BOOKINGS_OPEN = true;
 
 document.addEventListener("DOMContentLoaded", () => {
   // Mobile nav toggle

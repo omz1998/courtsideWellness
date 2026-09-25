@@ -5,19 +5,38 @@
 // account so it shows up in "My Account". Guests won't see their booking
 // there since there's no account to attach it to.
 
-// Each class type has its own fixed session time(s), Mon-Fri. "times" uses
-// 24hr "HH:MM" — these are the only times that will ever show as bookable
-// for that class.
+// Each class type has a "schedule": which day(s) of the week it runs, and
+// the fixed time(s) on that day. Keys are JS Date.getDay() values
+// (0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat); times use 24hr "HH:MM".
+// A day not present in "schedule" simply never shows up as a bookable date
+// for that class type.
+//
+// This is the real, confirmed timetable starting Tuesday 13 October 2026
+// (the day after Open Day):
+//   Mondays:    10:30 Mums and Bubs, 11:30 Mat Pilates
+//   Wednesdays: 10:30 Mat Pilates, 11:30 Mat Pilates
+//   Thursdays:  9:30 Mat Pilates, 11:00 Mums and Bubs
+//
 // Kids Fitness isn't in here — it launches as a school-holiday pilot rather
-// than a regular Mon-Fri class, so it isn't part of the normal date-driven
+// than a regular weekly class, so it isn't part of the normal date-driven
 // booking flow yet. See booking.html for its "register interest" note. Once
 // real school-holiday dates are confirmed, it can be added back in here.
+//
+// Women's Fitness & Strength and Women's Gym Fitness Classes aren't
+// scheduled yet either (no confirmed day/time), so they're left out of
+// booking.html's class picker for now — kept here, with an empty schedule,
+// so nothing else that references CLASS_TYPES breaks. Add a "schedule" once
+// a day/time is confirmed and add their card back to booking.html.
 const CLASS_TYPES = {
   pilates: {
     label: "Mat Pilates",
     price: 20,
     capacity: 30,
-    times: ["10:00"],
+    schedule: {
+      1: ["11:30"],           // Monday
+      3: ["10:30", "11:30"],  // Wednesday
+      4: ["09:30"]            // Thursday
+    },
     // Live Stripe Payment Link: "Standard Class - Courtside Wellness" ($20).
     stripeLink: "https://buy.stripe.com/9B6aEZcoVcc6bvK7673ZK06"
   },
@@ -25,7 +44,10 @@ const CLASS_TYPES = {
     label: "Mums and Bubs",
     price: 20,
     capacity: 30,
-    times: ["11:00"],
+    schedule: {
+      1: ["10:30"], // Monday
+      4: ["11:00"]  // Thursday
+    },
     // Reuses the $20 Standard Class Stripe link (same price point).
     stripeLink: "https://buy.stripe.com/9B6aEZcoVcc6bvK7673ZK06"
   },
@@ -33,17 +55,14 @@ const CLASS_TYPES = {
     label: "Women's Fitness & Strength",
     price: 20,
     capacity: 30,
-    times: ["12:30"],
-    // Reuses the $20 Standard Class Stripe link (same price point).
+    schedule: {}, // not scheduled yet — see note above
     stripeLink: "https://buy.stripe.com/9B6aEZcoVcc6bvK7673ZK06"
   },
   gymfitness: {
     label: "Women's Gym Fitness Classes",
     price: 20,
     capacity: 30,
-    // Placeholder time slot — change this if a different time suits better.
-    times: ["17:30"],
-    // Reuses the $20 Standard Class Stripe link (same price point).
+    schedule: {}, // not scheduled yet — see note above
     stripeLink: "https://buy.stripe.com/9B6aEZcoVcc6bvK7673ZK06"
   }
 };
@@ -96,20 +115,28 @@ function sessionKey(classType, date, time) {
   return `${classType}_${date}_${time}`;
 }
 
-// Classes don't start until launch day — no bookable date will ever be
-// offered before this, even once "tomorrow" catches up to it. Once launch
-// day has passed, this has no effect and dates just start from tomorrow.
-const FIRST_BOOKABLE_DATE = "2026-10-12";
+// Classes don't start until the day after Open Day — no bookable date will
+// ever be offered before this, even once "tomorrow" catches up to it. Once
+// this date has passed, this has no effect and dates just start from
+// tomorrow.
+const FIRST_BOOKABLE_DATE = "2026-10-13";
 
-function nextWeekdays(count) {
+// Returns the next `count` calendar dates that fall on one of the days this
+// class type actually runs (the keys of its "schedule"), starting from
+// tomorrow (or FIRST_BOOKABLE_DATE, whichever is later). E.g. Mat Pilates
+// only runs Mon/Wed/Thu, so Tue/Fri/Sat/Sun are skipped entirely for it.
+function nextClassDates(classType, count) {
+  const cfg = CLASS_TYPES[classType];
+  const runDays = Object.keys(cfg.schedule).map(Number);
   const dates = [];
+  if (!runDays.length) return dates; // no confirmed schedule yet
+
   let d = new Date();
   d.setDate(d.getDate() + 1); // start tomorrow
   const launch = new Date(FIRST_BOOKABLE_DATE + "T00:00:00");
   if (d < launch) d = launch;
   while (dates.length < count) {
-    const day = d.getDay();
-    if (day !== 0 && day !== 6) {
+    if (runDays.includes(d.getDay())) {
       dates.push(new Date(d));
     }
     d.setDate(d.getDate() + 1);
@@ -117,8 +144,19 @@ function nextWeekdays(count) {
   return dates;
 }
 
+// Builds a "YYYY-MM-DD" key from the date's *local* year/month/day.
+// Deliberately not `d.toISOString().slice(0, 10)` — that converts to UTC
+// first, which silently shifts the date back a day for anyone browsing in
+// the morning in a positive UTC offset like Australia/Sydney (e.g. 8am
+// AEDT is still the previous day in UTC). Every other date part shown in
+// this flow (weekday, day number, month) already comes from local getters,
+// so the stored key needs to match or a booking for "Wed 14 Oct" as shown
+// on screen could silently save as the 13th.
 function dateKey(d) {
-  return d.toISOString().slice(0, 10);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
 }
 
 async function fetchSpots(classType, dateStr, time) {
@@ -141,9 +179,14 @@ function renderDateGrid() {
   const grid = document.getElementById("date-grid");
   if (!grid || !selectedClassType) return;
 
-  const dates = nextWeekdays(10);
+  const dates = nextClassDates(selectedClassType, 10);
   const cfg = CLASS_TYPES[selectedClassType];
   document.getElementById("date-grid-label").textContent = `${cfg.label}: choose a date`;
+
+  if (!dates.length) {
+    grid.innerHTML = `<p>This class doesn't have a confirmed timetable yet. <a href="contact.html" style="text-decoration: underline;">Get in touch</a> and we'll let you know when it's scheduled.</p>`;
+    return;
+  }
 
   grid.innerHTML = dates.map((d) => {
     const key = dateKey(d);
@@ -181,8 +224,10 @@ async function renderTimeGrid() {
 
   const cfg = CLASS_TYPES[selectedClassType];
   const cards = [];
+  const dayOfWeek = new Date(selectedDate + "T00:00:00").getDay();
+  const times = cfg.schedule[dayOfWeek] || [];
 
-  for (const time of cfg.times) {
+  for (const time of times) {
     const info = await fetchSpots(selectedClassType, selectedDate, time);
     sessionsCache[sessionKey(selectedClassType, selectedDate, time)] = info;
 
@@ -213,9 +258,9 @@ async function renderTimeGrid() {
     });
   });
 
-  // Only one time for this class (e.g. Mat Pilates) — auto-select it so
-  // people aren't forced to click a single, obvious option.
-  if (cfg.times.length === 1) {
+  // Only one time on this particular date (e.g. Thursday Mat Pilates) —
+  // auto-select it so people aren't forced to click a single, obvious option.
+  if (times.length === 1) {
     const only = grid.querySelector(".date-option");
     if (only && !only.dataset.full) only.click();
   }
@@ -449,7 +494,7 @@ document.addEventListener("DOMContentLoaded", () => {
       card.innerHTML = `
         <div class="notice" style="text-align: center; padding: 40px 20px;">
           <h3 style="margin-bottom: 10px;">Bookings open soon</h3>
-          <p>We're putting the finishing touches on our timetable. Bookings open shortly before launch on Monday 12 October 2026. <a href="contact.html" style="text-decoration: underline;">Get in touch</a> to be notified, or check back soon.</p>
+          <p>We're putting the finishing touches on our timetable. Bookings open from 13 October 2026, the day after Open Day. <a href="contact.html" style="text-decoration: underline;">Get in touch</a> to be notified, or check back soon.</p>
         </div>
       `;
     }

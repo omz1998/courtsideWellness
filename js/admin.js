@@ -38,10 +38,21 @@ const DEMO_RSVPS = [
   { id: "rsvpdemo3", name: "Jess Taylor", phone: "0434 567 890", attending: false, headcount: 0, createdAt: demoTimestamp(-1) },
 ];
 
+// Local Y-M-D, not toISOString() — see the matching note on dateKey() in
+// js/booking.js for why the UTC conversion there silently shifts dates back
+// a day in Australia/Sydney. Kept consistent here so demo dates and the
+// "upcoming" cutoff below line up with what booking.js actually stores.
+function localDateKey(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
 function nextWeekday(offsetDays) {
   const d = new Date();
   d.setDate(d.getDate() + offsetDays);
-  return d.toISOString().slice(0, 10);
+  return localDateKey(d);
 }
 
 function demoTimestamp(offsetDays) {
@@ -68,7 +79,7 @@ function fmtCreated(ts) {
 }
 
 function loadStats(bookings) {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = localDateKey(new Date());
   const upcoming = bookings.filter((b) => b.date >= today && b.status !== "cancelled");
   const confirmed = bookings.filter((b) => b.status === "confirmed");
   const pending = bookings.filter((b) => b.status === "pending_payment");
