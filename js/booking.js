@@ -232,10 +232,13 @@ async function renderTimeGrid() {
     sessionsCache[sessionKey(selectedClassType, selectedDate, time)] = info;
 
     const remaining = info.capacity - info.booked;
-    let spotsLabel = `${remaining} spots left`;
+    // No label at all while spots are plentiful — a selectable, non-greyed
+    // card already implies availability. Only speak up once it's "Full" or
+    // genuinely limited (under 10 left).
+    let spotsLabel = "";
     let spotsClass = "";
     if (remaining <= 0) { spotsLabel = "Full"; spotsClass = "full"; }
-    else if (remaining <= 6) { spotsClass = "low"; }
+    else if (remaining < 10) { spotsLabel = `${remaining} spot${remaining === 1 ? "" : "s"} left`; spotsClass = "low"; }
 
     cards.push(`
       <div class="date-option" data-time="${time}" ${remaining <= 0 ? 'data-full="true"' : ""}>
@@ -273,6 +276,12 @@ function updateCapacityStatus() {
   box.classList.add("info");
   const info = sessionsCache[sessionKey(selectedClassType, selectedDate, selectedTime)];
   const remaining = Math.max(info.capacity - info.booked, 0);
+  // Stay quiet while spots are plentiful — you wouldn't have gotten this far
+  // if the session were full, and only under-10 is worth calling out.
+  if (remaining >= 10) {
+    box.classList.add("booking-hidden");
+    return;
+  }
   box.textContent = remaining <= 0
     ? "This session is full."
     : `${remaining} spot${remaining === 1 ? "" : "s"} left in this class.`;
