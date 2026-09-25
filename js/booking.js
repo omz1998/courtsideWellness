@@ -22,11 +22,13 @@
 // booking flow yet. See booking.html for its "register interest" note. Once
 // real school-holiday dates are confirmed, it can be added back in here.
 //
-// Women's Fitness & Strength and Women's Gym Fitness Classes aren't
-// scheduled yet either (no confirmed day/time), so they're left out of
-// booking.html's class picker for now — kept here, with an empty schedule,
-// so nothing else that references CLASS_TYPES breaks. Add a "schedule" once
-// a day/time is confirmed and add their card back to booking.html.
+// "Women's Fitness & Strength" and "Women's Gym Fitness Classes" were the
+// same class under two names — merged into one, "Women's Group Fitness
+// Classes (Gym)", a group session, not one-on-one PT. It isn't scheduled
+// yet either (no confirmed day/time), so it's left out of booking.html's
+// class picker for now — kept here, with an empty schedule, so nothing else
+// that references CLASS_TYPES breaks. Add a "schedule" once a day/time is
+// confirmed and add its card back to booking.html.
 const CLASS_TYPES = {
   pilates: {
     label: "Mat Pilates",
@@ -52,14 +54,7 @@ const CLASS_TYPES = {
     stripeLink: "https://buy.stripe.com/9B6aEZcoVcc6bvK7673ZK06"
   },
   strength: {
-    label: "Women's Fitness & Strength",
-    price: 20,
-    capacity: 30,
-    schedule: {}, // not scheduled yet — see note above
-    stripeLink: "https://buy.stripe.com/9B6aEZcoVcc6bvK7673ZK06"
-  },
-  gymfitness: {
-    label: "Women's Gym Fitness Classes",
+    label: "Women's Group Fitness Classes (Gym)",
     price: 20,
     capacity: 30,
     schedule: {}, // not scheduled yet — see note above
@@ -74,7 +69,7 @@ function formatTime(t) {
   return `${h12}:${String(m).padStart(2, "0")}${period}`;
 }
 
-let selectedClassType = null; // "pilates" | "mumsbubs" | "strength" | "gymfitness"
+let selectedClassType = null; // "pilates" | "mumsbubs" | "strength"
 let selectedDate = null;      // "YYYY-MM-DD"
 let selectedTime = null;      // "HH:MM" (24hr)
 let sessionsCache = {};       // sessionKey -> { booked, capacity, min }
@@ -83,10 +78,10 @@ let availableCredits = 0;     // total class credits across the user's confirmed
 let creditPackageId = null;   // the (oldest) package doc to redeem a credit from first
 let hasActiveMembership = false; // true if the logged-in user has an active $40/week membership
 
-// Membership covers unlimited bookings on all four women's classes. Kids
+// Membership covers unlimited bookings on all three women's classes. Kids
 // Fitness isn't part of this list since it's a separate school-holiday
 // pilot, not a regular bookable class yet.
-const MEMBERSHIP_CLASS_TYPES = ["pilates", "mumsbubs", "strength", "gymfitness"];
+const MEMBERSHIP_CLASS_TYPES = ["pilates", "mumsbubs", "strength"];
 
 // Class credits (from a 5- or 10-Class Pack) are generic — usable on any
 // class type, regardless of which pack they came from.
