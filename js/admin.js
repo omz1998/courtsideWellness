@@ -228,7 +228,7 @@ function renderMembersTable(members, interactive) {
 
     return `
       <tr>
-        <td>${m.name || "-"}</td>
+        <td>${m.name || "-"}${m.isAdminAccount ? ' <span class="admin-tag">Admin</span>' : ""}</td>
         <td><a href="mailto:${m.email}">${m.email || "-"}</a></td>
         <td><a href="tel:${m.phone}">${m.phone || "-"}</a></td>
         <td>${fmtCreated(m.createdAt)}</td>
@@ -251,14 +251,16 @@ let allMembers = [];
 async function loadMembers() {
   const snap = await authDb.collection("users").get();
   const members = [];
-  // Skip admin accounts — they're staff, not customers, and don't belong in
-  // this list. Checked via a flag on their own users/{uid} doc rather than
-  // querying the "admins" collection directly, since Firestore rules only
-  // let each admin read their own admin record, not list the whole
-  // collection (see README's "Grant yourself admin access" step).
+  // Admin accounts DO show up here (tagged, see renderMembersTable) — an
+  // admin's own account is otherwise invisible in this list, with no way to
+  // grant/manage their own membership (e.g. to preview the member checkout
+  // flow). Flag is set on their own users/{uid} doc rather than querying the
+  // "admins" collection directly, since Firestore rules only let each admin
+  // read their own admin record, not list the whole collection (see
+  // README's "Grant yourself admin access" step).
   snap.forEach((doc) => {
     const data = doc.data();
-    if (!data.isAdminAccount) members.push({ id: doc.id, ...data });
+    members.push({ id: doc.id, ...data });
   });
   members.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
   allMembers = members;

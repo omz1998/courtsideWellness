@@ -207,6 +207,7 @@ a { color: inherit; text-decoration: none; }
   transition: transform 0.15s ease, box-shadow 0.15s ease;
   cursor: pointer;
   border: none;
+  white-space: nowrap; /* buttons are meant to be one line, e.g. admin-table action buttons like "Grant Membership" wrapping mid-word looked broken */
 }
 
 .btn-primary {
@@ -1063,6 +1064,20 @@ h2 {
 .admin-status-pending_payment { background: #FFF4E5; color: #8A5A00; }
 .admin-status-confirmed { background: #E7F5EC; color: #1E6B3E; }
 .admin-status-cancelled { background: #FCE8E6; color: #B3261E; }
+
+/* Tags a staff/admin account in the Members table, so it's clear why a
+   familiar name is mixed in with paying customers. */
+.admin-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--pink-soft);
+  color: var(--pink-dark);
+}
 
 .admin-tabs {
   display: flex;
