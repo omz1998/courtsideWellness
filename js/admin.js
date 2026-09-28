@@ -215,6 +215,13 @@ function renderMembersTable(members, interactive) {
         ${status !== "active" ? `<button class="btn btn-outline admin-membership-action" data-action="reactivate" data-id="${m.id}">Reactivate</button>` : ""}
         ${status !== "cancelled" ? `<button class="btn btn-outline admin-membership-action" data-action="cancel" data-id="${m.id}">Cancel</button>` : ""}
       `;
+    } else if (interactive && !status) {
+      // Never had a membership record at all (e.g. an admin/staff account, or
+      // a friends-and-family comp) — "Reactivate" only makes sense once
+      // there's an existing record to reactivate, so this is the one way to
+      // grant membership to someone starting from scratch, without them
+      // paying through Stripe.
+      actionsHtml = `<button class="btn btn-outline admin-membership-action" data-action="grant" data-id="${m.id}">Grant Membership</button>`;
     } else if (!interactive) {
       actionsHtml = `<span style="color: var(--ink-soft); font-size: 0.85rem;">Sample data</span>`;
     }
@@ -284,7 +291,7 @@ async function handleMembershipAction(action, uid) {
     if (action === "cancel") {
       if (!confirm("Manually cancel this membership? This is a manual override. Cancellation normally happens automatically via Stripe. The member should also cancel their subscription in Stripe so they stop being billed.")) return;
       await authDb.collection("users").doc(uid).update({ "membership.status": "cancelled" });
-    } else if (action === "reactivate") {
+    } else if (action === "reactivate" || action === "grant") {
       await authDb.collection("users").doc(uid).update({ "membership.status": "active" });
     }
     loadMembers();
