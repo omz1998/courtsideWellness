@@ -285,6 +285,11 @@ function filterMembers() {
     });
   }
 
+  const roleSelect = document.getElementById("members-role-filter");
+  const role = roleSelect ? roleSelect.value : "all";
+  if (role === "admin") filtered = filtered.filter((m) => m.isAdminAccount);
+  else if (role === "nonadmin") filtered = filtered.filter((m) => !m.isAdminAccount);
+
   renderMembersTable(filtered, !DEMO_MODE);
 }
 
@@ -449,6 +454,8 @@ function initAdminTabs() {
 
   const membersFilter = document.getElementById("members-filter");
   if (membersFilter) membersFilter.addEventListener("change", filterMembers);
+  const membersRoleFilter = document.getElementById("members-role-filter");
+  if (membersRoleFilter) membersRoleFilter.addEventListener("change", filterMembers);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
