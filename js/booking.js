@@ -14,7 +14,7 @@
 // This is the real, confirmed timetable starting Tuesday 13 October 2026
 // (the day after Open Day):
 //   Mondays:    10:30 Mums and Bubs, 11:30 Mat Pilates
-//   Wednesdays: 10:30 Mat Pilates, 11:30 Mat Pilates
+//   Wednesdays: 9:30 Mat Pilates, 10:30 Mat Pilates
 //   Thursdays:  9:30 Mat Pilates, 11:00 Mums and Bubs
 //
 // Kids Fitness isn't in here — it launches as a school-holiday pilot rather
@@ -36,7 +36,7 @@ const CLASS_TYPES = {
     capacity: 30,
     schedule: {
       1: ["11:30"],           // Monday
-      3: ["10:30", "11:30"],  // Wednesday
+      3: ["09:30", "10:30"],  // Wednesday
       4: ["09:30"]            // Thursday
     },
     // Live Stripe Payment Link: "Standard Class - Courtside Wellness" ($20).
