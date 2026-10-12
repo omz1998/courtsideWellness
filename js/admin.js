@@ -396,13 +396,24 @@ async function handleMembershipAction(action, uid) {
 let allBookings = [];
 
 async function loadBookings() {
-  const snap = await authDb.collection("bookings").get();
-  const bookings = [];
-  snap.forEach((doc) => bookings.push({ id: doc.id, ...doc.data() }));
+  const upcomingEl = document.getElementById("upcoming-list");
+  let bookings = [];
+  try {
+    const snap = await authDb.collection("bookings").get();
+    snap.forEach((doc) => bookings.push({ id: doc.id, ...doc.data() }));
+  } catch (err) {
+    console.error(err);
+    if (upcomingEl) upcomingEl.innerHTML = `<div class="notice">Couldn't load bookings: ${escHtml((err.message || "").replace("Firebase: ", ""))}</div>`;
+    return;
+  }
   bookings.sort((a, b) => (a.date || "").localeCompare(b.date || ""));
   allBookings = bookings;
-  loadStats(bookings);
-  renderUpcomingClasses(bookings);
+  // Each piece is isolated so one failing can't leave the others stuck on "Loading…".
+  try { loadStats(bookings); } catch (e) { console.error("loadStats", e); }
+  try { renderUpcomingClasses(bookings); } catch (e) {
+    console.error("renderUpcomingClasses", e);
+    if (upcomingEl) upcomingEl.innerHTML = `<div class="notice">Couldn't build the upcoming view: ${escHtml(e.message)}</div>`;
+  }
   filterBookings();
 }
 

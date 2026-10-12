@@ -1186,3 +1186,16 @@ h2 {
   border-radius: 999px;
   white-space: nowrap;
 }
+
+/* Admin: upcoming classes grouped by session */
+.session-day { font-size: 1.05rem; margin: 24px 0 10px; color: var(--ink); }
+.session-card { background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 14px; padding: 14px 18px; margin-bottom: 10px; }
+.session-card summary { display: flex; justify-content: space-between; align-items: center; gap: 12px; cursor: pointer; font-weight: 600; list-style: none; }
+.session-card summary::-webkit-details-marker { display: none; }
+.session-count { color: var(--pink-dark); white-space: nowrap; }
+.session-count.full { color: #B3261E; }
+.session-bar { height: 6px; background: var(--cream, #f5f1ea); border-radius: 999px; margin: 12px 0 8px; overflow: hidden; }
+.session-bar div { height: 100%; background: var(--pink-dark); border-radius: 999px; }
+.session-sub { font-size: 0.85rem; color: var(--ink-soft); margin: 0 0 8px; }
+.session-people { margin: 0; padding-left: 18px; font-size: 0.9rem; }
+.session-people li { margin: 4px 0; }
