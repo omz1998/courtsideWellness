@@ -113,7 +113,7 @@ function renderBookingsTable(bookings, interactive) {
         <td>${b.name || "-"}</td>
         <td><a href="mailto:${b.email}">${b.email || "-"}</a></td>
         <td><a href="tel:${b.phone}">${b.phone || "-"}</a></td>
-        <td>$${b.price || 20}</td>
+        <td>${b.price === 0 ? "Free" : "$" + (b.price || 20)}</td>
         <td><span class="admin-status admin-status-${b.status}">${statusLabel}</span></td>
         <td>
           ${interactive ? `

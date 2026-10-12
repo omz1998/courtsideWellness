@@ -202,7 +202,7 @@ async function loadBookings(uid, isMember) {
         <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap;">
           <div>
             <h3>${fmtDate(b.date)}${formatTime(b.time)}</h3>
-            <p>${b.classLabel || "Class"} &middot; $${b.price || 20} &middot; ${statusLabel}${isPast ? " &middot; Past" : ""}</p>
+            <p>${b.classLabel || "Class"} &middot; ${b.price === 0 ? "Free" : "$" + (b.price || 20)} &middot; ${statusLabel}${isPast ? " &middot; Past" : ""}</p>
           </div>
           <div style="display: flex; gap: 8px; flex-wrap: wrap;">
             ${canMove ? `<button class="btn btn-outline reschedule-btn" data-id="${b.id}">Reschedule</button>` : ""}

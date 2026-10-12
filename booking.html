@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Book a Class · Courtside Wellness</title>
-<meta name="description" content="Book a women's class at Courtside Wellness, Minto NSW: Mat Pilates or Mums and Bubs, $20 flat, starting Tuesday 13 October 2026. No account needed.">
+<meta name="description" content="Book a women's class at Courtside Wellness, Minto NSW: Mat Pilates, $20 a class, starting Tuesday 13 October 2026. No account needed.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="icon" type="image/png" href="images/favicon.png">
@@ -36,53 +36,31 @@
   <span class="eyebrow">Book a Class</span>
   <h1>Book Your Spot</h1>
   <p class="lead">No account needed, book as a guest, or log in first if you'd like this saved to your account.</p>
-  <p class="hero-meta">Bookings open from 13 October 2026, the day after Open Day &middot; pick a class below to see its earliest available date.</p>
+  <p class="hero-meta">Bookings open from 13 October 2026, the day after Open Day.</p>
 </section>
 
 <section style="padding-top: 0;">
   <div class="section-inner reveal">
     <div class="booking-card">
       <div class="booking-steps">
-        <div class="step active">1. Choose a class</div>
-        <div class="step">2. Choose a date</div>
-        <div class="step">3. Your details</div>
-        <div class="step">4. Payment</div>
+        <div class="step active">1. Choose a date</div>
+        <div class="step">2. Your details</div>
+        <div class="step">3. Payment</div>
       </div>
 
-      <!-- Step 1: class type -->
-      <div id="step-1" class="booking-step">
-        <div class="class-type-grid">
-          <div class="class-type-option" data-type="pilates">
-            <h3>Mat Pilates</h3>
-            <div class="amount">$20</div>
-            <div class="schedule-chips">
-              <span class="schedule-chip">Mon 11:30am</span>
-              <span class="schedule-chip">Wed 9:30am &amp; 10:30am</span>
-              <span class="schedule-chip">Thu 9:30am</span>
-            </div>
-            <p>Women's, up to 30 people.</p>
-          </div>
-          <div class="class-type-option" data-type="mumsbubs">
-            <h3>Mums and Bubs</h3>
-            <div class="amount">$20</div>
-            <div class="schedule-chips">
-              <span class="schedule-chip">Mon 10:30am</span>
-              <span class="schedule-chip">Thu 11:00am</span>
-            </div>
-            <p>Women's, bring bub along.</p>
-          </div>
+      <!-- Step 2: date (first step now; class type is fixed to Mat Pilates) -->
+      <div id="step-2" class="booking-step">
+        <div class="schedule-chips" style="margin-bottom: 8px;">
+          <span class="schedule-chip">Mon 10:00am</span>
+          <span class="schedule-chip">Wed 9:30am</span>
+          <span class="schedule-chip">Thu 10:30am</span>
         </div>
-        <p style="font-size: 0.85rem; color: var(--ink-soft); margin-top: 16px;">
-          Looking for Kids Fitness? It's launching during the school holidays for ages 3+, not yet part of the regular weekly timetable. <a href="contact.html?topic=kids-fitness" style="text-decoration: underline; color: var(--pink-dark);">Register your interest</a>.
+        <p style="font-size: 0.85rem; color: var(--ink-soft); margin: 0 0 20px;">
+          Women's, up to 30 people. Additional classes can be added subject to demand, <a href="contact.html" style="text-decoration: underline; color: var(--pink-dark);">let us know</a> what you'd like to see.
         </p>
-        <p style="font-size: 0.85rem; color: var(--ink-soft); margin-top: 8px;">
-          This is our starting timetable, additional classes like Women's Group Fitness Classes (Gym) can be added subject to demand. <a href="contact.html" style="text-decoration: underline; color: var(--pink-dark);">Let us know</a> what you'd like to see more of.
+        <p style="font-size: 0.85rem; color: var(--ink-soft); margin: 0 0 20px;">
+          Members: <a href="padel.html" style="text-decoration: underline; color: var(--pink-dark); font-weight: 600;">book free padel</a>, Tuesdays and Thursdays 10am.
         </p>
-        <button id="to-step-2" class="btn btn-primary" style="margin-top: 24px;" disabled>Continue</button>
-      </div>
-
-      <!-- Step 2: date -->
-      <div id="step-2" class="booking-step booking-hidden">
         <span class="section-label" id="date-grid-label">Choose a date</span>
         <div id="date-grid" class="date-grid"></div>
 
@@ -93,7 +71,6 @@
 
         <div id="capacity-status" class="capacity-status booking-hidden"></div>
         <div class="btn-row" style="justify-content: flex-start; margin-top: 24px;">
-          <button type="button" id="back-to-1" class="btn btn-outline">Back</button>
           <button id="to-step-3" class="btn btn-primary" disabled>Continue</button>
         </div>
       </div>

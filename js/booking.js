@@ -11,11 +11,13 @@
 // A day not present in "schedule" simply never shows up as a bookable date
 // for that class type.
 //
-// This is the real, confirmed timetable starting Tuesday 13 October 2026
-// (the day after Open Day):
-//   Mondays:    10:30 Mums and Bubs, 11:30 Mat Pilates
-//   Wednesdays: 9:30 Mat Pilates, 10:30 Mat Pilates
-//   Thursdays:  9:30 Mat Pilates, 11:00 Mums and Bubs
+// CURRENTLY BOOKABLE: Mat Pilates only, one session per day, via the
+// simplified flow (no class-type screen; selectedClassType is fixed to
+// "pilates"):
+//   Mondays 10:00, Wednesdays 9:30, Thursdays 10:30
+// Mums and Bubs is still a supported class (other pages, membership) but is
+// not offered in the booking flow for now; its schedule below is kept so it
+// can be switched back on.
 //
 // Kids Fitness isn't in here — it launches as a school-holiday pilot rather
 // than a regular weekly class, so it isn't part of the normal date-driven
@@ -35,9 +37,9 @@ const CLASS_TYPES = {
     price: 20,
     capacity: 30,
     schedule: {
-      1: ["11:30"],           // Monday
-      3: ["09:30", "10:30"],  // Wednesday
-      4: ["09:30"]            // Thursday
+      1: ["10:00"],  // Monday
+      3: ["09:30"],  // Wednesday
+      4: ["10:30"]   // Thursday
     },
     // Live Stripe Payment Link: "Standard Class - Courtside Wellness" ($20).
     stripeLink: "https://buy.stripe.com/9B6aEZcoVcc6bvK7673ZK06"
@@ -52,6 +54,23 @@ const CLASS_TYPES = {
     },
     // Reuses the $20 Standard Class Stripe link (same price point).
     stripeLink: "https://buy.stripe.com/9B6aEZcoVcc6bvK7673ZK06"
+  },
+  // Free members-only Padel session, booked from padel.html (not part of the
+  // Mat Pilates flow on booking.html). Tuesdays and Thursdays 10:00am for 90
+  // minutes, max 4 players. Listed here so My Account can show, cancel and
+  // reschedule these bookings like any other.
+  padel: {
+    label: "Free Padel (Members)",
+    price: 0,
+    capacity: 4,
+    durationMins: 90,
+    firstDate: "2026-10-15", // starts Thursday 15 October 2026
+    membersOnly: true,
+    schedule: {
+      2: ["10:00"], // Tuesday
+      4: ["10:00"]  // Thursday
+    },
+    stripeLink: null
   },
   strength: {
     label: "Women's Group Fitness Classes (Gym)",
@@ -69,7 +88,7 @@ function formatTime(t) {
   return `${h12}:${String(m).padStart(2, "0")}${period}`;
 }
 
-let selectedClassType = null; // "pilates" | "mumsbubs" | "strength"
+let selectedClassType = "pilates"; // fixed for now: only Mat Pilates is bookable
 let selectedDate = null;      // "YYYY-MM-DD"
 let selectedTime = null;      // "HH:MM" (24hr)
 let sessionsCache = {};       // sessionKey -> { booked, capacity, min }
@@ -128,7 +147,7 @@ function nextClassDates(classType, count) {
 
   let d = new Date();
   d.setDate(d.getDate() + 1); // start tomorrow
-  const launch = new Date(FIRST_BOOKABLE_DATE + "T00:00:00");
+  const launch = new Date((cfg.firstDate || FIRST_BOOKABLE_DATE) + "T00:00:00");
   if (d < launch) d = launch;
   while (dates.length < count) {
     if (runDays.includes(d.getDay())) {
@@ -160,14 +179,6 @@ async function fetchSpots(classType, dateStr, time) {
   const doc = await authDb.collection("sessions").doc(sessionKey(classType, dateStr, time)).get();
   if (doc.exists) return doc.data();
   return { booked: 0, capacity: cfg.capacity };
-}
-
-function selectClassType(type) {
-  selectedClassType = type;
-  document.querySelectorAll(".class-type-option").forEach((el) => {
-    el.classList.toggle("selected", el.dataset.type === type);
-  });
-  document.getElementById("to-step-2").disabled = false;
 }
 
 function renderDateGrid() {
@@ -286,7 +297,8 @@ function goToStep(step) {
   document.querySelectorAll(".booking-step").forEach((el) => el.classList.add("booking-hidden"));
   document.getElementById(`step-${step}`).classList.remove("booking-hidden");
   document.querySelectorAll(".booking-steps .step").forEach((el, i) => {
-    el.classList.toggle("active", i === step - 1);
+    // Step 1 (class type) was removed, so step N is indicator N-2.
+    el.classList.toggle("active", i === step - 2);
   });
   if (step === 2) renderDateGrid();
 }
@@ -505,10 +517,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  document.querySelectorAll(".class-type-option").forEach((el) => {
-    el.addEventListener("click", () => selectClassType(el.dataset.type));
-  });
-
   onAuthReady(async (user) => {
     bookingUser = user || null;
 
@@ -527,8 +535,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  document.getElementById("to-step-2").addEventListener("click", () => goToStep(2));
-  document.getElementById("back-to-1").addEventListener("click", () => goToStep(1));
+  goToStep(2); // straight to date selection, Mat Pilates is preselected
   document.getElementById("to-step-3").addEventListener("click", () => goToStep(3));
   document.getElementById("back-to-2").addEventListener("click", () => goToStep(2));
   document.getElementById("booking-form").addEventListener("submit", submitBooking);
