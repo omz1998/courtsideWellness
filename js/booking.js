@@ -15,9 +15,8 @@
 // simplified flow (no class-type screen; selectedClassType is fixed to
 // "pilates"):
 //   Mondays 10:00, Wednesdays 10:30, Thursdays 10:30
-// Mums and Bubs is still a supported class (other pages, membership) but is
-// not offered in the booking flow for now; its schedule below is kept so it
-// can be switched back on.
+// Mums and Bubs was removed as a separate class: bub is now simply welcome
+// in the room at Mat Pilates.
 //
 // Kids Fitness isn't in here — it launches as a school-holiday pilot rather
 // than a regular weekly class, so it isn't part of the normal date-driven
@@ -42,17 +41,6 @@ const CLASS_TYPES = {
       4: ["10:30"]   // Thursday
     },
     // Live Stripe Payment Link: "Standard Class - Courtside Wellness" ($20).
-    stripeLink: "https://buy.stripe.com/9B6aEZcoVcc6bvK7673ZK06"
-  },
-  mumsbubs: {
-    label: "Mums and Bubs",
-    price: 20,
-    capacity: 30,
-    schedule: {
-      1: ["10:30"], // Monday
-      4: ["11:00"]  // Thursday
-    },
-    // Reuses the $20 Standard Class Stripe link (same price point).
     stripeLink: "https://buy.stripe.com/9B6aEZcoVcc6bvK7673ZK06"
   },
   // Free members-only Padel session, booked from padel.html (not part of the
@@ -100,7 +88,7 @@ let hasActiveMembership = false; // true if the logged-in user has an active $40
 // Membership covers unlimited bookings on all three women's classes. Kids
 // Fitness isn't part of this list since it's a separate school-holiday
 // pilot, not a regular bookable class yet.
-const MEMBERSHIP_CLASS_TYPES = ["pilates", "mumsbubs", "strength"];
+const MEMBERSHIP_CLASS_TYPES = ["pilates", "strength"];
 
 // Class credits (from a 5- or 10-Class Pack) are generic — usable on any
 // class type, regardless of which pack they came from.
