@@ -315,20 +315,30 @@ const MEMBERSHIP_WEEKLY_PRICE = 40;
 // A membership paid through Stripe always has a stripeSubscriptionId (set by
 // the webhook). One granted manually from this dashboard doesn't, so it counts
 // as active (gets the perks) but isn't paying, and is excluded from revenue.
-function isPayingMember(m) {
-  return !!(m.membership && m.membership.status === "active" && m.membership.stripeSubscriptionId);
+function isActiveMember(m) {
+  return !!(m.membership && m.membership.status === "active");
 }
+// "Paying" = active, billed through Stripe, and not an admin account. Admins
+// are staff/test accounts, so they never count as customer revenue.
+function isPayingMember(m) {
+  return isActiveMember(m) && !!m.membership.stripeSubscriptionId && !m.isAdminAccount;
+}
+// Active but not paying: manually granted (no Stripe subscription) or an admin.
+function isCompMember(m) {
+  return isActiveMember(m) && !isPayingMember(m);
+}
+// Shown as the "Granted" tag: active with no Stripe subscription.
 function isGrantedMember(m) {
-  return !!(m.membership && m.membership.status === "active" && !m.membership.stripeSubscriptionId);
+  return isActiveMember(m) && !m.membership.stripeSubscriptionId;
 }
 
 function updateMemberStats(members) {
   const paying = members.filter(isPayingMember).length;
-  const granted = members.filter(isGrantedMember).length;
+  const granted = members.filter(isCompMember).length;
   const pastDue = members.filter((m) => m.membership && m.membership.status === "past_due").length;
   const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
-  set("stat-active-members", paying + granted);
-  set("stat-active-members-sub", `${paying} paying, ${granted} granted`);
+  set("stat-active-members", paying);
+  set("stat-active-members-sub", granted ? `plus ${granted} granted/admin` : "");
   set("stat-weekly-revenue", `$${paying * MEMBERSHIP_WEEKLY_PRICE}`);
   set("stat-past-due", pastDue);
 }
@@ -367,6 +377,8 @@ function filterMembers() {
     filtered = filtered.filter((m) => {
       const membershipStatus = m.membership && m.membership.status;
       if (status === "none") return !membershipStatus;
+      if (status === "active") return isPayingMember(m);
+      if (status === "active_comp") return isCompMember(m);
       return membershipStatus === status;
     });
   }
