@@ -14,7 +14,7 @@
 // CURRENTLY BOOKABLE: Mat Pilates only, one session per day, via the
 // simplified flow (no class-type screen; selectedClassType is fixed to
 // "pilates"):
-//   Mondays 10:00, Wednesdays 9:30, Thursdays 10:30
+//   Mondays 10:00, Wednesdays 10:30, Thursdays 10:30
 // Mums and Bubs is still a supported class (other pages, membership) but is
 // not offered in the booking flow for now; its schedule below is kept so it
 // can be switched back on.
@@ -38,7 +38,7 @@ const CLASS_TYPES = {
     capacity: 30,
     schedule: {
       1: ["10:00"],  // Monday
-      3: ["09:30"],  // Wednesday
+      3: ["10:30"],  // Wednesday
       4: ["10:30"]   // Thursday
     },
     // Live Stripe Payment Link: "Standard Class - Courtside Wellness" ($20).
