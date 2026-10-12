@@ -42,12 +42,19 @@
   <div class="section-inner reveal" id="admin-wrap">
 
     <div class="admin-tabs">
-      <button type="button" class="admin-tab active" data-tab="bookings">Bookings</button>
+      <button type="button" class="admin-tab active" data-tab="upcoming">Upcoming Classes</button>
+      <button type="button" class="admin-tab" data-tab="bookings">All Bookings</button>
       <button type="button" class="admin-tab" data-tab="members">Members</button>
       <button type="button" class="admin-tab" data-tab="rsvps">Open Day RSVPs</button>
     </div>
 
-    <div id="tab-bookings" class="admin-tab-panel">
+    <div id="tab-upcoming" class="admin-tab-panel">
+      <span class="section-label">Upcoming Classes</span>
+      <p style="font-size: 0.9rem; color: var(--ink-soft); margin-bottom: 16px;">Every upcoming session with how many are booked. Tap a session to see who's coming. Cancelled bookings aren't counted.</p>
+      <div id="upcoming-list"><p>Loading…</p></div>
+    </div>
+
+    <div id="tab-bookings" class="admin-tab-panel booking-hidden">
       <div class="admin-stats">
         <div class="stat-card">
           <div class="stat-number" id="stat-upcoming">-</div>
@@ -63,7 +70,7 @@
         </div>
         <div class="stat-card">
           <div class="stat-number" id="stat-revenue">-</div>
-          <div class="stat-label">Confirmed revenue</div>
+          <div class="stat-label">Drop-in revenue (non-members)</div>
         </div>
       </div>
 
@@ -114,6 +121,21 @@
 
     <div id="tab-members" class="admin-tab-panel booking-hidden">
       <span class="section-label">Members</span>
+      <div class="admin-stats">
+        <div class="stat-card">
+          <div class="stat-number" id="stat-active-members">-</div>
+          <div class="stat-label">Active members</div>
+          <div class="stat-label" id="stat-active-members-sub" style="font-size: 0.75rem; opacity: 0.8;"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="stat-weekly-revenue">-</div>
+          <div class="stat-label">Weekly membership revenue (paying only)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="stat-past-due">-</div>
+          <div class="stat-label">Past due</div>
+        </div>
+      </div>
       <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
         <input type="text" id="members-search" class="admin-search" placeholder="Search members by name or email..." style="flex: 1; min-width: 220px;">
         <select id="members-filter" class="admin-search" style="width: auto; flex: none;">

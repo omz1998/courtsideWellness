@@ -83,12 +83,74 @@ function loadStats(bookings) {
   const upcoming = bookings.filter((b) => b.date >= today && b.status !== "cancelled");
   const confirmed = bookings.filter((b) => b.status === "confirmed");
   const pending = bookings.filter((b) => b.status === "pending_payment");
-  const revenue = confirmed.reduce((sum, b) => sum + (b.price || 0), 0);
+  // Drop-in revenue only: confirmed bookings that were actually paid for per
+  // class. Bookings covered by a membership or a pre-paid class credit
+  // aren't new money here (membership shows on the Members tab, credits were
+  // paid for when the pack was bought).
+  const revenue = confirmed
+    .filter((b) => !b.paidWithMembership && !b.paidWithCredit)
+    .reduce((sum, b) => sum + (b.price || 0), 0);
 
   document.getElementById("stat-upcoming").textContent = upcoming.length;
   document.getElementById("stat-pending").textContent = pending.length;
   document.getElementById("stat-confirmed").textContent = confirmed.length;
   document.getElementById("stat-revenue").textContent = `$${revenue}`;
+}
+
+// Capacity per class type, mirrors CLASS_TYPES in js/booking.js (admin.html
+// doesn't load booking.js). Unknown types fall back to 30.
+const SESSION_CAPACITY = { padel: 4 };
+
+function escHtml(v) {
+  return String(v ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+}
+
+// Groups non-cancelled bookings from today onwards into one card per session
+// (class + date + time), soonest first, showing booked count vs capacity and
+// an expandable attendee list.
+function renderUpcomingClasses(bookings) {
+  const wrap = document.getElementById("upcoming-list");
+  if (!wrap) return;
+  const today = localDateKey(new Date());
+  const groups = {};
+  bookings.forEach((b) => {
+    if (!b.date || b.date < today || b.status === "cancelled") return;
+    const key = `${b.date}|${b.time || ""}|${b.classType || b.classLabel}`;
+    (groups[key] = groups[key] || { date: b.date, time: b.time, classType: b.classType, label: b.classLabel || b.classType || "Class", people: [] }).people.push(b);
+  });
+  const sessions = Object.values(groups).sort((a, b) =>
+    a.date.localeCompare(b.date) || (a.time || "").localeCompare(b.time || ""));
+
+  if (!sessions.length) {
+    wrap.innerHTML = `<div class="notice">No upcoming bookings yet.</div>`;
+    return;
+  }
+
+  const byDate = {};
+  sessions.forEach((s) => (byDate[s.date] = byDate[s.date] || []).push(s));
+
+  wrap.innerHTML = Object.keys(byDate).map((date) => `
+    <h3 class="session-day">${fmtDate(date)}</h3>
+    ${byDate[date].map((s) => {
+      const cap = SESSION_CAPACITY[s.classType] || 30;
+      const total = s.people.length;
+      const confirmed = s.people.filter((p) => p.status === "confirmed").length;
+      const pending = total - confirmed;
+      const pct = Math.min(100, Math.round((total / cap) * 100));
+      return `
+        <details class="session-card">
+          <summary>
+            <span class="session-title">${escHtml(formatTime(s.time).replace(/^, /, ""))} &middot; ${escHtml(s.label)}</span>
+            <span class="session-count${total >= cap ? " full" : ""}">${total} / ${cap}${total >= cap ? " (full)" : ""}</span>
+          </summary>
+          <div class="session-bar"><div style="width: ${pct}%;"></div></div>
+          <p class="session-sub">${confirmed} confirmed${pending ? `, ${pending} pending payment` : ""}</p>
+          <ul class="session-people">
+            ${s.people.map((p) => `<li>${escHtml(p.name || "-")} &middot; <a href="tel:${escHtml(p.phone)}">${escHtml(p.phone || "-")}</a>${p.status === "confirmed" ? "" : ' <span class="admin-status admin-status-pending_payment">Pending</span>'}</li>`).join("")}
+          </ul>
+        </details>`;
+    }).join("")}
+  `).join("");
 }
 
 function renderBookingsTable(bookings, interactive) {
@@ -228,7 +290,7 @@ function renderMembersTable(members, interactive) {
 
     return `
       <tr>
-        <td>${m.name || "-"}${m.isAdminAccount ? ' <span class="admin-tag">Admin</span>' : ""}</td>
+        <td>${m.name || "-"}${m.isAdminAccount ? ' <span class="admin-tag">Admin</span>' : ""}${isGrantedMember(m) ? ' <span class="admin-tag">Granted</span>' : ""}</td>
         <td><a href="mailto:${m.email}">${m.email || "-"}</a></td>
         <td><a href="tel:${m.phone}">${m.phone || "-"}</a></td>
         <td>${fmtCreated(m.createdAt)}</td>
@@ -248,6 +310,29 @@ function renderMembersTable(members, interactive) {
 
 let allMembers = [];
 
+const MEMBERSHIP_WEEKLY_PRICE = 40;
+
+// A membership paid through Stripe always has a stripeSubscriptionId (set by
+// the webhook). One granted manually from this dashboard doesn't, so it counts
+// as active (gets the perks) but isn't paying, and is excluded from revenue.
+function isPayingMember(m) {
+  return !!(m.membership && m.membership.status === "active" && m.membership.stripeSubscriptionId);
+}
+function isGrantedMember(m) {
+  return !!(m.membership && m.membership.status === "active" && !m.membership.stripeSubscriptionId);
+}
+
+function updateMemberStats(members) {
+  const paying = members.filter(isPayingMember).length;
+  const granted = members.filter(isGrantedMember).length;
+  const pastDue = members.filter((m) => m.membership && m.membership.status === "past_due").length;
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  set("stat-active-members", paying + granted);
+  set("stat-active-members-sub", `${paying} paying, ${granted} granted`);
+  set("stat-weekly-revenue", `$${paying * MEMBERSHIP_WEEKLY_PRICE}`);
+  set("stat-past-due", pastDue);
+}
+
 async function loadMembers() {
   const snap = await authDb.collection("users").get();
   const members = [];
@@ -264,6 +349,7 @@ async function loadMembers() {
   });
   members.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
   allMembers = members;
+  updateMemberStats(members);
   filterMembers();
 }
 
@@ -316,6 +402,7 @@ async function loadBookings() {
   bookings.sort((a, b) => (a.date || "").localeCompare(b.date || ""));
   allBookings = bookings;
   loadStats(bookings);
+  renderUpcomingClasses(bookings);
   filterBookings();
 }
 
@@ -428,9 +515,11 @@ function loadDemo() {
 
   allBookings = DEMO_BOOKINGS;
   loadStats(DEMO_BOOKINGS);
+  renderUpcomingClasses(DEMO_BOOKINGS);
   renderBookingsTable(DEMO_BOOKINGS, false);
   renderPackagesTable(DEMO_PACKAGES, false);
   allMembers = DEMO_MEMBERS;
+  updateMemberStats(DEMO_MEMBERS);
   renderMembersTable(DEMO_MEMBERS, false);
   renderRSVPsTable(DEMO_RSVPS);
 }
