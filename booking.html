@@ -102,6 +102,16 @@
               <label for="b-phone">Phone</label>
               <input type="tel" id="b-phone" placeholder="0412 345 678" required>
             </div>
+            <div>
+              <label for="b-children">Will you be bringing a child or children?</label>
+              <select id="b-children" class="admin-search" style="width: 100%;">
+                <option value="0" selected>No</option>
+                <option value="1">Yes, 1 child</option>
+                <option value="2">Yes, 2 children</option>
+                <option value="3">Yes, 3 children</option>
+                <option value="4">Yes, 4 or more children</option>
+              </select>
+            </div>
             <p id="form-error" class="form-error booking-hidden"></p>
             <div class="btn-row" style="justify-content: flex-start;">
               <button type="button" id="back-to-2" class="btn btn-outline">Back</button>

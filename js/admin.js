@@ -137,6 +137,7 @@ function renderUpcomingClasses(bookings) {
       const confirmed = s.people.filter((p) => p.status === "confirmed").length;
       const pending = total - confirmed;
       const pct = Math.min(100, Math.round((total / cap) * 100));
+      const kids = s.people.reduce((sum, p) => sum + (p.childCount || 0), 0);
       return `
         <details class="session-card">
           <summary>
@@ -144,9 +145,9 @@ function renderUpcomingClasses(bookings) {
             <span class="session-count${total >= cap ? " full" : ""}">${total} / ${cap}${total >= cap ? " (full)" : ""}</span>
           </summary>
           <div class="session-bar"><div style="width: ${pct}%;"></div></div>
-          <p class="session-sub">${confirmed} confirmed${pending ? `, ${pending} pending payment` : ""}</p>
+          <p class="session-sub">${confirmed} confirmed${pending ? `, ${pending} pending payment` : ""}${kids ? ` &middot; ${kids} child${kids === 1 ? "" : "ren"} coming` : ""}</p>
           <ul class="session-people">
-            ${s.people.map((p) => `<li>${escHtml(p.name || "-")} &middot; <a href="tel:${escHtml(p.phone)}">${escHtml(p.phone || "-")}</a>${p.status === "confirmed" ? "" : ' <span class="admin-status admin-status-pending_payment">Pending</span>'}</li>`).join("")}
+            ${s.people.map((p) => `<li>${escHtml(p.name || "-")} &middot; <a href="tel:${escHtml(p.phone)}">${escHtml(p.phone || "-")}</a>${p.childCount ? ` &middot; +${p.childCount} child${p.childCount === 1 ? "" : "ren"}` : ""}${p.status === "confirmed" ? "" : ' <span class="admin-status admin-status-pending_payment">Pending</span>'}</li>`).join("")}
           </ul>
         </details>`;
     }).join("")}
@@ -172,7 +173,7 @@ function renderBookingsTable(bookings, interactive) {
       <tr>
         <td>${fmtDate(b.date)}${formatTime(b.time)}</td>
         <td>${b.classLabel || "-"}</td>
-        <td>${b.name || "-"}</td>
+        <td>${b.name || "-"}${b.childCount ? ` <span class="admin-tag">+${b.childCount} kid${b.childCount === 1 ? "" : "s"}</span>` : ""}</td>
         <td><a href="mailto:${b.email}">${b.email || "-"}</a></td>
         <td><a href="tel:${b.phone}">${b.phone || "-"}</a></td>
         <td>${b.price === 0 ? "Free" : "$" + (b.price || 20)}</td>

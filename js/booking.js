@@ -83,6 +83,12 @@ let sessionsCache = {};       // sessionKey -> { booked, capacity, min }
 let bookingUser = null;       // Firebase user if logged in, else null
 let availableCredits = 0;     // total class credits across the user's confirmed packages
 let creditPackageId = null;   // the (oldest) package doc to redeem a credit from first
+// Resolves once we've finished checking who's logged in and whether they're a
+// member. The booking flow waits on this before deciding between "Book Free
+// (Membership)" and "Pay Now", so a member who clicks through quickly can't
+// be wrongly shown the pay button before their membership has loaded.
+let resolveMemberReady;
+const memberStatusReady = new Promise((r) => { resolveMemberReady = r; });
 let hasActiveMembership = false; // true if the logged-in user has an active $40/week membership
 
 // Membership covers unlimited bookings on all three women's classes. Kids
@@ -297,6 +303,7 @@ async function submitBooking(e) {
   const email = document.getElementById("b-email").value.trim();
   const phone = document.getElementById("b-phone").value.trim();
   const errorEl = document.getElementById("form-error");
+  const childCount = parseInt((document.getElementById("b-children") || {}).value, 10) || 0;
 
   if (!name || !email || !phone || !selectedDate || !selectedTime || !selectedClassType) {
     errorEl.textContent = "Please fill in all fields.";
@@ -327,6 +334,8 @@ async function submitBooking(e) {
         date: selectedDate,
         time: selectedTime,
         price: cfg.price,
+        bringingChildren: childCount > 0,
+        childCount,
         status: "pending_payment",
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
@@ -356,6 +365,10 @@ async function submitBooking(e) {
   document.getElementById("summary-date").textContent =
     new Date(selectedDate).toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long" }) + ` at ${formatTime(selectedTime)}`;
   document.getElementById("summary-price").textContent = `$${cfg.price}`;
+
+  // Make sure we know whether this person is a member before choosing which
+  // payment option to show (waits at most 5s so a slow lookup can't hang it).
+  await Promise.race([memberStatusReady, new Promise((r) => setTimeout(r, 5000))]);
 
   goToStep(4);
 
@@ -506,20 +519,24 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   onAuthReady(async (user) => {
-    bookingUser = user || null;
+    try {
+      bookingUser = user || null;
 
-    if (user) {
-      const profile = await getUserProfile(user.uid);
-      if (profile) {
-        document.getElementById("b-name").value = profile.name || "";
-        document.getElementById("b-email").value = profile.email || user.email || "";
-        document.getElementById("b-phone").value = profile.phone || "";
-      } else {
-        document.getElementById("b-email").value = user.email || "";
+      if (user) {
+        const profile = await getUserProfile(user.uid);
+        if (profile) {
+          document.getElementById("b-name").value = profile.name || "";
+          document.getElementById("b-email").value = profile.email || user.email || "";
+          document.getElementById("b-phone").value = profile.phone || "";
+        } else {
+          document.getElementById("b-email").value = user.email || "";
+        }
+        document.getElementById("guest-note").classList.add("booking-hidden");
+        hasActiveMembership = !!(profile && profile.membership && profile.membership.status === "active");
+        await loadAvailableCredits(user.uid);
       }
-      document.getElementById("guest-note").classList.add("booking-hidden");
-      hasActiveMembership = !!(profile && profile.membership && profile.membership.status === "active");
-      await loadAvailableCredits(user.uid);
+    } finally {
+      resolveMemberReady();
     }
   });
 
