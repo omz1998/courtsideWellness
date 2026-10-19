@@ -178,6 +178,26 @@ async function loadBookings(uid, isMember) {
   snap.forEach((doc) => bookings.push({ id: doc.id, ...doc.data() }));
   bookings.sort((a, b) => (a.date || "").localeCompare(b.date || ""));
 
+  // Self-heal: an active member's upcoming booking should never sit at
+  // "pending payment" (members book free). If one got stuck, e.g. the
+  // confirmation step didn't complete, confirm it now. Firestore rules still
+  // verify the membership is genuinely active for this exact update.
+  if (isMember) {
+    const todayKey = dateKey(new Date()); // from booking.js (local date, not UTC)
+    const stuck = bookings.filter((b) =>
+      b.status === "pending_payment" && (b.date || "") >= todayKey &&
+      ["pilates", "mumsbubs", "strength", "padel"].includes(b.classType));
+    await Promise.all(stuck.map(async (b) => {
+      try {
+        await authDb.collection("bookings").doc(b.id).update({ status: "confirmed", paidWithMembership: true });
+        b.status = "confirmed";
+        b.paidWithMembership = true;
+      } catch (err) {
+        console.warn("Couldn't auto-confirm booking", b.id, err);
+      }
+    }));
+  }
+
   renderStats(bookings, credits, isMember);
 
   if (snap.empty) {
