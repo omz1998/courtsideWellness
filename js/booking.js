@@ -123,6 +123,19 @@ function sessionKey(classType, date, time) {
   return `${classType}_${date}_${time}`;
 }
 
+// Individual sessions to hide from booking (e.g. a class with no bookings
+// that we're not running). Format: "<classType>_<YYYY-MM-DD>_<HH:MM>", the same
+// as sessionKey(). A date disappears entirely once all its times are hidden.
+// Only affects what can be newly booked; existing bookings are untouched, so
+// check the admin Upcoming Classes tab before hiding a session.
+const HIDDEN_SESSIONS = [
+  "pilates_2026-10-22_10:30" // Thu 22 Oct Mat Pilates: no bookings, not running
+];
+
+function isSessionHidden(classType, date, time) {
+  return HIDDEN_SESSIONS.includes(sessionKey(classType, date, time));
+}
+
 // Classes don't start until the day after Open Day — no bookable date will
 // ever be offered before this, even once "tomorrow" catches up to it. Once
 // this date has passed, this has no effect and dates just start from
@@ -145,7 +158,11 @@ function nextClassDates(classType, count) {
   if (d < launch) d = launch;
   while (dates.length < count) {
     if (runDays.includes(d.getDay())) {
-      dates.push(new Date(d));
+      const key = dateKey(d);
+      const times = cfg.schedule[d.getDay()] || [];
+      if (!times.every((t) => isSessionHidden(classType, key, t))) {
+        dates.push(new Date(d));
+      }
     }
     d.setDate(d.getDate() + 1);
   }
@@ -225,7 +242,7 @@ async function renderTimeGrid() {
   const cfg = CLASS_TYPES[selectedClassType];
   const cards = [];
   const dayOfWeek = new Date(selectedDate + "T00:00:00").getDay();
-  const times = cfg.schedule[dayOfWeek] || [];
+  const times = (cfg.schedule[dayOfWeek] || []).filter((t) => !isSessionHidden(selectedClassType, selectedDate, t));
 
   for (const time of times) {
     const info = await fetchSpots(selectedClassType, selectedDate, time);
