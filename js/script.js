@@ -2,12 +2,13 @@
 
 // Bookings toggle — while false, every "Book a Class" link/button
 // site-wide (nav button, Classes page buttons, Contact page button) is
-// automatically relabelled to "Bookings Open Soon" and disabled, and
-// booking.html itself shows a holding message instead of the booking form.
+// automatically relabelled "Register Interest" and pointed at the contact
+// form, and booking.html itself shows a holding message instead of the
+// booking form.
 // No other file needs to change when you flip this back to true.
 // See FIRST_BOOKABLE_DATE / LAST_BOOKABLE_DATE in js/booking.js for the
 // actual range of class dates offered.
-const BOOKINGS_OPEN = true;
+const BOOKINGS_OPEN = false;
 
 // ON HOLD: while true, memberships and class packs can't be bought: their
 // buttons become "Register Interest" links to the contact form, and the
@@ -23,10 +24,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (!BOOKINGS_OPEN) {
     document.querySelectorAll('a[href="booking.html"]').forEach((el) => {
-      el.textContent = "Bookings Open Soon";
-      el.removeAttribute("href");
-      el.classList.add("btn-disabled");
-      el.setAttribute("aria-disabled", "true");
+      el.textContent = "Register Interest";
+      el.setAttribute("href", "contact.html?topic=classes");
     });
   }
 

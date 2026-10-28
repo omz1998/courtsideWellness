@@ -201,7 +201,7 @@ async function loadBookings(uid, isMember) {
   renderStats(bookings, credits, isMember);
 
   if (snap.empty) {
-    list.innerHTML = "<p>No bookings yet. <a href=\"booking.html\" style=\"text-decoration: underline; color: var(--pink-dark);\">Book a class</a>.</p>";
+    list.innerHTML = "<p>No bookings yet. <a href=\"contact.html?topic=classes\" style=\"text-decoration: underline; color: var(--pink-dark);\">Register your interest</a>.</p>";
     return;
   }
 

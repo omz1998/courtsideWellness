@@ -142,10 +142,9 @@ function isSessionHidden(classType, date, time) {
 // tomorrow.
 const FIRST_BOOKABLE_DATE = "2026-10-13";
 
-// ON HOLD: no class dates after this are offered (end of the week of 28 Oct
-// 2026). Set to null to reopen bookings. See REGISTER_INTEREST_MODE in
+// ON HOLD: no class dates after this are offered (nothing from 29 Oct 2026). Set to null to reopen bookings. See REGISTER_INTEREST_MODE in
 // js/script.js for the matching "register interest" wording elsewhere.
-const LAST_BOOKABLE_DATE = "2026-11-01";
+const LAST_BOOKABLE_DATE = "2026-10-28";
 
 // Returns the next `count` calendar dates that fall on one of the days this
 // class type actually runs (the keys of its "schedule"), starting from
