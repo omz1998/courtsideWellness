@@ -136,8 +136,8 @@ function isSessionHidden(classType, date, time) {
   return HIDDEN_SESSIONS.includes(sessionKey(classType, date, time));
 }
 
-// Classes don't start until the day after Open Day — no bookable date will
-// ever be offered before this, even once "tomorrow" catches up to it. Once
+// No bookable date will ever be offered before this, even if "tomorrow"
+// is earlier. Once
 // this date has passed, this has no effect and dates just start from
 // tomorrow.
 const FIRST_BOOKABLE_DATE = "2026-10-13";
@@ -537,7 +537,7 @@ document.addEventListener("DOMContentLoaded", () => {
       card.innerHTML = `
         <div class="notice" style="text-align: center; padding: 40px 20px;">
           <h3 style="margin-bottom: 10px;">Bookings open soon</h3>
-          <p>We're putting the finishing touches on our timetable. Bookings open from 13 October 2026, the day after Open Day. <a href="contact.html" style="text-decoration: underline;">Get in touch</a> to be notified, or check back soon.</p>
+          <p>Bookings are closed right now. <a href="contact.html?topic=classes" style="text-decoration: underline;">Register your interest</a> and we'll let you know when they reopen.</p>
         </div>
       `;
     }

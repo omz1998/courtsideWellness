@@ -5,8 +5,8 @@
 // automatically relabelled to "Bookings Open Soon" and disabled, and
 // booking.html itself shows a holding message instead of the booking form.
 // No other file needs to change when you flip this back to true.
-// Live from 13 October 2026 (the day after Open Day) — see
-// FIRST_BOOKABLE_DATE in js/booking.js for the actual earliest class date.
+// See FIRST_BOOKABLE_DATE / LAST_BOOKABLE_DATE in js/booking.js for the
+// actual range of class dates offered.
 const BOOKINGS_OPEN = true;
 
 // ON HOLD: while true, memberships and class packs can't be bought: their

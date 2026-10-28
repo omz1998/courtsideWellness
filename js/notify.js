@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
           from_name: "Courtside Wellness Website",
           email,
           replyto: email,
-          message: `${email} asked to be notified about Open Day and new classes.`
+          message: `${email} asked to be notified about new classes.`
         })
       });
       const data = await res.json();
