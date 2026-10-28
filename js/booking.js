@@ -142,6 +142,11 @@ function isSessionHidden(classType, date, time) {
 // tomorrow.
 const FIRST_BOOKABLE_DATE = "2026-10-13";
 
+// ON HOLD: no class dates after this are offered (end of the week of 28 Oct
+// 2026). Set to null to reopen bookings. See REGISTER_INTEREST_MODE in
+// js/script.js for the matching "register interest" wording elsewhere.
+const LAST_BOOKABLE_DATE = "2026-11-01";
+
 // Returns the next `count` calendar dates that fall on one of the days this
 // class type actually runs (the keys of its "schedule"), starting from
 // tomorrow (or FIRST_BOOKABLE_DATE, whichever is later). E.g. Mat Pilates
@@ -156,7 +161,9 @@ function nextClassDates(classType, count) {
   d.setDate(d.getDate() + 1); // start tomorrow
   const launch = new Date((cfg.firstDate || FIRST_BOOKABLE_DATE) + "T00:00:00");
   if (d < launch) d = launch;
+  const last = LAST_BOOKABLE_DATE ? new Date(LAST_BOOKABLE_DATE + "T23:59:59") : null;
   while (dates.length < count) {
+    if (last && d > last) break; // bookings on hold past this date
     if (runDays.includes(d.getDay())) {
       const key = dateKey(d);
       const times = cfg.schedule[d.getDay()] || [];
@@ -201,7 +208,9 @@ function renderDateGrid() {
   document.getElementById("date-grid-label").textContent = `${cfg.label}: choose a date`;
 
   if (!dates.length) {
-    grid.innerHTML = `<p>This class doesn't have a confirmed timetable yet. <a href="contact.html" style="text-decoration: underline;">Get in touch</a> and we'll let you know when it's scheduled.</p>`;
+    grid.innerHTML = LAST_BOOKABLE_DATE
+      ? `<div class="notice">Bookings are on hold for now. <a href="contact.html?topic=classes" style="text-decoration: underline; color: var(--pink-dark); font-weight: 600;">Register your interest</a> and we'll let you know as soon as classes are back.</div>`
+      : `<p>This class doesn't have a confirmed timetable yet. <a href="contact.html" style="text-decoration: underline;">Get in touch</a> and we'll let you know when it's scheduled.</p>`;
     return;
   }
 

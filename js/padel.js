@@ -40,6 +40,11 @@ async function renderPadelDates() {
   const time = PADEL.schedule[2][0];
   const dates = nextClassDates("padel", 8);
 
+  if (!dates.length) {
+    grid.innerHTML = `<div class="notice">Free padel sessions are on hold for now. <a href="contact.html?topic=interest" style="text-decoration: underline; color: var(--pink-dark); font-weight: 600;">Register your interest</a> and we'll let you know when they're back.</div>`;
+    return;
+  }
+
   const infos = await Promise.all(dates.map((d) => padelFetchSpots(dateKey(d), time)));
 
   grid.innerHTML = dates.map((d, i) => {

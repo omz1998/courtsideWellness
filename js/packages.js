@@ -117,6 +117,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (user) loadMyCredits(user.uid);
   });
 
+  // While REGISTER_INTEREST_MODE is on, these are plain "Register Interest"
+  // links (no purchase), so don't wire them up to Stripe.
+  if (typeof REGISTER_INTEREST_MODE !== "undefined" && REGISTER_INTEREST_MODE) return;
   document.getElementById("buy-pack5").addEventListener("click", () => buyPackage("pack5"));
   document.getElementById("buy-pack10").addEventListener("click", () => buyPackage("pack10"));
 });

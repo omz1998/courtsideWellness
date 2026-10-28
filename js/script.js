@@ -9,6 +9,12 @@
 // FIRST_BOOKABLE_DATE in js/booking.js for the actual earliest class date.
 const BOOKINGS_OPEN = true;
 
+// ON HOLD: while true, memberships and class packs can't be bought: their
+// buttons become "Register Interest" links to the contact form, and the
+// booking flow stops offering dates after LAST_BOOKABLE_DATE (js/booking.js).
+// Flip to false (and clear LAST_BOOKABLE_DATE) to restart everything.
+const REGISTER_INTEREST_MODE = true;
+
 document.addEventListener("DOMContentLoaded", () => {
   // Mobile nav toggle
   const toggle = document.querySelector(".nav-toggle");

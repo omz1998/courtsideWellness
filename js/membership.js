@@ -88,6 +88,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (user) loadMembershipStatus(user.uid);
   });
 
+  // While REGISTER_INTEREST_MODE is on, the join button is a plain
+  // "Register Interest" link, so don't wire it up to Stripe.
   const joinBtn = document.getElementById("join-membership-btn");
-  if (joinBtn) joinBtn.addEventListener("click", joinMembership);
+  if (joinBtn && !(typeof REGISTER_INTEREST_MODE !== "undefined" && REGISTER_INTEREST_MODE)) {
+    joinBtn.addEventListener("click", joinMembership);
+  }
 });

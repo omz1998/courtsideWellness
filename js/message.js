@@ -119,9 +119,16 @@ document.addEventListener("DOMContentLoaded", () => {
   // arrives with context already filled in, instead of a blank box that
   // leaves admin guessing what someone's actually asking about.
   const topic = new URLSearchParams(location.search).get("topic");
-  if (topic === "kids-fitness") {
+  const TOPIC_MESSAGES = {
+    "kids-fitness": "I'm interested in Kids Fitness classes, please let me know when dates are confirmed.",
+    "membership": "I'd like to register my interest in a Courtside Wellness membership. Please let me know when memberships are available again.",
+    "packages": "I'd like to register my interest in a class pack. Please let me know when packs are available again.",
+    "classes": "I'd like to register my interest in Courtside Wellness classes. Please let me know when bookings reopen.",
+    "interest": "I'd like to register my interest in Courtside Wellness. Please keep me posted on classes, memberships and what's coming next."
+  };
+  if (TOPIC_MESSAGES[topic]) {
     const messageInput = document.getElementById("m-message");
-    if (messageInput) messageInput.value = "I'm interested in Kids Fitness classes, please let me know when dates are confirmed.";
+    if (messageInput) messageInput.value = TOPIC_MESSAGES[topic];
     openMessageModal();
   }
 });
